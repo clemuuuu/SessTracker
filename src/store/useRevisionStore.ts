@@ -11,6 +11,14 @@ import {
 } from '@xyflow/react';
 import { v4 as uuidv4 } from 'uuid';
 import { type RevisionNode, type SubjectType } from '../types';
+import { getAncestorIds, getAncestorSet, getNodeDepth } from '../utils/graphHelpers';
+
+const MAX_DEPTH = 10;
+
+interface HistoryEntry {
+    nodes: RevisionNode[];
+    edges: Edge[];
+}
 
 interface RevisionState {
     nodes: RevisionNode[];
@@ -18,6 +26,10 @@ interface RevisionState {
     activeNodeId: string | null;
     activeAncestorIds: string[]; // IDs of ancestors of the active node
     lastTick: number | null;
+
+    // Undo/Redo
+    history: HistoryEntry[];
+    historyIndex: number;
 
     // Actions
     addNode: (parentId: string | null, type: SubjectType, label: string) => void;
@@ -32,6 +44,11 @@ interface RevisionState {
     tickCallback: () => void; // Call this periodically from a component/hook
     setNodes: (nodes: RevisionNode[]) => void;
     setEdges: (edges: Edge[]) => void;
+
+    undo: () => void;
+    redo: () => void;
+    canUndo: () => boolean;
+    canRedo: () => boolean;
 }
 
 const DEFAULT_NODES: RevisionNode[] = [
@@ -43,6 +60,20 @@ const DEFAULT_NODES: RevisionNode[] = [
     },
 ];
 
+// Helper to push a snapshot to history
+function pushHistory(state: RevisionState): Pick<RevisionState, 'history' | 'historyIndex'> {
+    const entry: HistoryEntry = {
+        nodes: JSON.parse(JSON.stringify(state.nodes)),
+        edges: JSON.parse(JSON.stringify(state.edges)),
+    };
+    // Truncate any future entries if we're not at the end
+    const newHistory = state.history.slice(0, state.historyIndex + 1);
+    newHistory.push(entry);
+    // Keep max 50 entries
+    if (newHistory.length > 50) newHistory.shift();
+    return { history: newHistory, historyIndex: newHistory.length - 1 };
+}
+
 export const useRevisionStore = create<RevisionState>()(
     persist(
         (set, get) => ({
@@ -51,8 +82,16 @@ export const useRevisionStore = create<RevisionState>()(
             activeNodeId: null,
             activeAncestorIds: [],
             lastTick: null,
+            history: [{ nodes: DEFAULT_NODES, edges: [] }],
+            historyIndex: 0,
 
             addNode: (parentId, type, label) => {
+                // Depth limit check
+                if (parentId) {
+                    const depth = getNodeDepth(parentId, get().edges);
+                    if (depth >= MAX_DEPTH) return;
+                }
+
                 const id = uuidv4();
                 const newNode: RevisionNode = {
                     id,
@@ -69,18 +108,30 @@ export const useRevisionStore = create<RevisionState>()(
                         ]
                         : state.edges;
 
-                    return {
+                    const newState = {
                         nodes: [...state.nodes, newNode],
                         edges: newEdges,
+                    };
+
+                    return {
+                        ...newState,
+                        ...pushHistory({ ...state, ...newState }),
                     };
                 });
             },
 
             updateNodeLabel: (id, label) => {
-                set({
-                    nodes: get().nodes.map((node) =>
-                        node.id === id ? { ...node, data: { ...node.data, label } } : node
-                    ),
+                const trimmed = label.trim();
+                if (!trimmed) return; // Reject empty labels
+
+                set((state) => {
+                    const newNodes = state.nodes.map((node) =>
+                        node.id === id ? { ...node, data: { ...node.data, label: trimmed } } : node
+                    );
+                    return {
+                        nodes: newNodes,
+                        ...pushHistory({ ...state, nodes: newNodes }),
+                    };
                 });
             },
 
@@ -91,26 +142,30 @@ export const useRevisionStore = create<RevisionState>()(
 
                     if (!nodeToDelete) return state;
 
-                    // Recursive deletion helper
+                    // Build children map for O(n) traversal instead of repeated .filter()
+                    const childrenMap = new Map<string, string[]>();
+                    for (const edge of edges) {
+                        const children = childrenMap.get(edge.source) || [];
+                        children.push(edge.target);
+                        childrenMap.set(edge.source, children);
+                    }
+
                     const getNodesToDelete = (startId: string): string[] => {
-                        const node = nodes.find((n) => n.id === startId);
-                        if (!node) return [];
-
-                        // Should properly use getOutgoers but we need the edges too.
-                        // Simplified: find edges where source is startId, get target, recurse.
-                        const childIds = edges
-                            .filter(e => e.source === startId)
-                            .map(e => e.target);
-
-                        return [startId, ...childIds.flatMap(getNodesToDelete)];
+                        const children = childrenMap.get(startId) || [];
+                        return [startId, ...children.flatMap(getNodesToDelete)];
                     };
 
                     const idsToDelete = new Set(getNodesToDelete(id));
 
+                    const newNodes = nodes.filter((n) => !idsToDelete.has(n.id));
+                    const newEdges = edges.filter((e) => !idsToDelete.has(e.source) && !idsToDelete.has(e.target));
+
                     return {
-                        nodes: nodes.filter((n) => !idsToDelete.has(n.id)),
-                        edges: edges.filter((e) => !idsToDelete.has(e.source) && !idsToDelete.has(e.target)),
+                        nodes: newNodes,
+                        edges: newEdges,
                         activeNodeId: idsToDelete.has(state.activeNodeId || '') ? null : state.activeNodeId,
+                        activeAncestorIds: idsToDelete.has(state.activeNodeId || '') ? [] : state.activeAncestorIds,
+                        ...pushHistory({ ...state, nodes: newNodes, edges: newEdges }),
                     };
                 });
             },
@@ -148,22 +203,7 @@ export const useRevisionStore = create<RevisionState>()(
                         )
                     }));
                 } else {
-                    // Helper to find all ancestors of a node
-                    const getAncestors = (startId: string, edges: Edge[]): string[] => {
-                        const ancestors: string[] = [];
-                        let currentId = startId;
-
-                        while (true) {
-                            const parentEdge = edges.find(e => e.target === currentId);
-                            if (!parentEdge) break;
-
-                            ancestors.push(parentEdge.source);
-                            currentId = parentEdge.source;
-                        }
-                        return ancestors;
-                    };
-
-                    const ancestors = getAncestors(id, state.edges);
+                    const ancestors = getAncestorIds(id, state.edges);
 
                     // Start timer
                     set((state) => ({
@@ -188,23 +228,7 @@ export const useRevisionStore = create<RevisionState>()(
                 const now = Date.now();
                 const deltaSeconds = (now - state.lastTick) / 1000;
 
-                // Helper to find all ancestors of a node
-                const getAncestors = (startId: string, edges: Edge[]): Set<string> => {
-                    const ancestors = new Set<string>();
-                    let currentId = startId;
-
-                    while (true) {
-                        const parentEdge = edges.find(e => e.target === currentId);
-                        if (!parentEdge) break;
-
-                        ancestors.add(parentEdge.source);
-                        currentId = parentEdge.source;
-                    }
-                    return ancestors;
-                };
-
-                const nodesToUpdate = getAncestors(state.activeNodeId, state.edges);
-                nodesToUpdate.add(state.activeNodeId);
+                const nodesToUpdate = getAncestorSet(state.activeNodeId, state.edges);
 
                 set((state) => ({
                     lastTick: now,
@@ -225,9 +249,52 @@ export const useRevisionStore = create<RevisionState>()(
             setNodes: (nodes) => set({ nodes }),
             setEdges: (edges) => set({ edges }),
 
+            undo: () => {
+                const state = get();
+                if (state.historyIndex <= 0) return;
+
+                const newIndex = state.historyIndex - 1;
+                const entry = state.history[newIndex];
+
+                set({
+                    nodes: JSON.parse(JSON.stringify(entry.nodes)),
+                    edges: JSON.parse(JSON.stringify(entry.edges)),
+                    historyIndex: newIndex,
+                    activeNodeId: null,
+                    activeAncestorIds: [],
+                    lastTick: null,
+                });
+            },
+
+            redo: () => {
+                const state = get();
+                if (state.historyIndex >= state.history.length - 1) return;
+
+                const newIndex = state.historyIndex + 1;
+                const entry = state.history[newIndex];
+
+                set({
+                    nodes: JSON.parse(JSON.stringify(entry.nodes)),
+                    edges: JSON.parse(JSON.stringify(entry.edges)),
+                    historyIndex: newIndex,
+                    activeNodeId: null,
+                    activeAncestorIds: [],
+                    lastTick: null,
+                });
+            },
+
+            canUndo: () => get().historyIndex > 0,
+            canRedo: () => get().historyIndex < get().history.length - 1,
         }),
         {
             name: 'revision-tracker-storage',
+            partialize: (state) => ({
+                nodes: state.nodes,
+                edges: state.edges,
+                activeNodeId: state.activeNodeId,
+                activeAncestorIds: state.activeAncestorIds,
+                lastTick: state.lastTick,
+            }),
         }
     )
 );

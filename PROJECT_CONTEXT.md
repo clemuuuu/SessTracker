@@ -13,7 +13,6 @@ SessTracker is a web application designed to track revision sessions using a vis
 - **Icons**: Lucide React
 - **Layout Engine**: Dagre (for auto-layout)
 
-![Overview](image-1.png)
 
 ## Project Structure
 ```
@@ -21,8 +20,6 @@ SessTracker is a web application designed to track revision sessions using a vis
   /components
     /nodes
       RevisionNode.tsx       # Custom Node component with Timer & Controls
-    /ui
-      (Reserved for generic UI components)
     /ui
       (Reserved for generic UI components)
     FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
@@ -34,7 +31,7 @@ SessTracker is a web application designed to track revision sessions using a vis
   /types
     index.ts                 # Shared TypeScript interfaces (RevisionNode, SubjectType)
   /utils
-    (Reserved for helpers)
+    graphHelpers.ts          # Graph traversal utilities (getAncestorIds, buildParentMap, getNodeDepth)
   App.tsx                    # Main entry point, sets up React Flow provider
   main.tsx                   # React root
   index.css                  # Global styles & Tailwind imports

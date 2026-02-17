@@ -50,9 +50,16 @@ export function RevisionNode({ id, data }: NodeProps<RevisionNodeType>) {
                 <input
                     className="bg-transparent text-lg font-bold text-white w-full outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1"
                     defaultValue={data.label}
+                    maxLength={60}
                     onBlur={(e) => {
-                        if (e.target.value !== data.label) {
-                            updateNodeLabel(id, e.target.value);
+                        const trimmed = e.target.value.trim();
+                        if (!trimmed) {
+                            // Restore original label if empty
+                            e.target.value = data.label;
+                            return;
+                        }
+                        if (trimmed !== data.label) {
+                            updateNodeLabel(id, trimmed);
                         }
                     }}
                     onKeyDown={(e) => {

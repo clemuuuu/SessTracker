@@ -20,7 +20,9 @@ function App() {
     onNodesChange,
     onEdgesChange,
     onConnect,
-    tickCallback
+    tickCallback,
+    undo,
+    redo
   } = useRevisionStore();
 
   const { onLayout } = useAutoLayout();
@@ -32,6 +34,22 @@ function App() {
     }, 1000);
     return () => clearInterval(interval);
   }, [tickCallback]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
 
   return (
     <div className="relative w-screen h-screen text-white overflow-hidden bg-gray-900">
