@@ -20,8 +20,14 @@ SessTracker is a web application designed to track revision sessions using a vis
     /features
       /background
         BackgroundTree.tsx       # Canvas component for the Organic 3D Background
+        RootsBackground.tsx      # Inverted organic tree for Roots view
       /controls
-        FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
+        FloatingControls.tsx     # Top-left controls
+      /stats                     # Statistics and Roots view
+        RootsView.tsx            # Bottom section container
+        StatisticsPanel.tsx      # Charts and data visualization
+      /tree                      # Main Tree view
+        MainTree.tsx             # Top section container
     /nodes
       RevisionNode.tsx           # Custom Node component with Timer & Controls
     /ui
@@ -98,6 +104,7 @@ SessTracker is a web application designed to track revision sessions using a vis
 ## Known Implementation Details
 - **Port**: Configured to strictly use port `5173` to prevent data "loss" (since localStorage is origin-bound).
 - **Auto-Save**: The "Auto-saved" badge is purely visual feedback; saving happens synchronously on every state change.
+- **Roots Background Opacity**: Implemented using **local component state** (`useState`) in `RootsView.tsx` rather than the global Zustand store. This decision was made to avoid circular dependency issues and to keep the UI-specific logic isolated and lightweight. The slider controls the opacity of the amber gradient overlay (0 to 1).
 
 ## Git Workflow (Reminder)
 

@@ -21,6 +21,18 @@ export const useRevisionStore = create<RevisionState>()(
                 activeAncestorIds: state.activeAncestorIds,
                 lastTick: state.lastTick,
             }),
+            onRehydrateStorage: () => (state) => {
+                // Migration: Ensure all nodes have valid sessions array
+                if (state && state.nodes) {
+                    state.nodes = state.nodes.map(node => ({
+                        ...node,
+                        data: {
+                            ...node.data,
+                            sessions: Array.isArray(node.data.sessions) ? node.data.sessions : []
+                        }
+                    }));
+                }
+            }
         }
     )
 );

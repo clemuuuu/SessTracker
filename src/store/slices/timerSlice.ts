@@ -2,6 +2,8 @@ import type { StateCreator } from 'zustand';
 import type { RevisionState, TimerSlice } from './types';
 import { getAncestorIds, getAncestorSet } from '../../utils/graphHelpers';
 
+import { v4 as uuidv4 } from 'uuid';
+
 export const createTimerSlice: StateCreator<RevisionState, [], [], TimerSlice> = (set, get) => ({
     activeNodeId: null,
     activeAncestorIds: [],
@@ -17,22 +19,77 @@ export const createTimerSlice: StateCreator<RevisionState, [], [], TimerSlice> =
                 activeNodeId: null,
                 activeAncestorIds: [],
                 lastTick: null,
-                nodes: state.nodes.map(n =>
-                    n.id === id ? { ...n, data: { ...n.data, isRunning: false } } : n
-                )
+                nodes: state.nodes.map(n => {
+                    if (n.id === id) {
+                        const currentSession = n.data.sessions[n.data.sessions.length - 1];
+                        const updatedSessions = [...n.data.sessions];
+                        if (currentSession && !currentSession.endTime) {
+                            updatedSessions[updatedSessions.length - 1] = {
+                                ...currentSession,
+                                endTime: now,
+                                duration: (now - currentSession.startTime) / 1000
+                            };
+                        }
+
+                        return {
+                            ...n,
+                            data: {
+                                ...n.data,
+                                isRunning: false,
+                                sessions: updatedSessions
+                            }
+                        };
+                    }
+                    return n;
+                })
             });
         } else {
             const ancestors = getAncestorIds(id, state.edges);
 
             // Start timer
-            const newNodes = state.nodes.map(n => ({
-                ...n,
-                data: {
-                    ...n.data,
-                    // Deactivate old active node if any, activate new one
-                    isRunning: n.id === id
+            const newNodes = state.nodes.map(n => {
+                // If this is the new active node, start a session
+                if (n.id === id) {
+                    return {
+                        ...n,
+                        data: {
+                            ...n.data,
+                            isRunning: true,
+                            sessions: [
+                                ...n.data.sessions,
+                                {
+                                    id: uuidv4(),
+                                    startTime: now,
+                                    duration: 0
+                                }
+                            ]
+                        }
+                    };
                 }
-            }));
+
+                // If this was the PREVIOUS active node, stop its session
+                if (n.id === state.activeNodeId) {
+                    const currentSession = n.data.sessions[n.data.sessions.length - 1];
+                    const updatedSessions = [...n.data.sessions];
+                    if (currentSession && !currentSession.endTime) {
+                        updatedSessions[updatedSessions.length - 1] = {
+                            ...currentSession,
+                            endTime: now,
+                            duration: (now - currentSession.startTime) / 1000
+                        };
+                    }
+                    return {
+                        ...n,
+                        data: {
+                            ...n.data,
+                            isRunning: false,
+                            sessions: updatedSessions
+                        }
+                    };
+                }
+
+                return n;
+            });
 
             set({
                 activeNodeId: id,
@@ -61,6 +118,14 @@ export const createTimerSlice: StateCreator<RevisionState, [], [], TimerSlice> =
                         data: {
                             ...node.data,
                             totalTime: (node.data.totalTime || 0) + deltaSeconds,
+                            // If this is the active node (not just ancestor), update current session
+                            sessions: node.id === state.activeNodeId
+                                ? node.data.sessions.map((s, i) =>
+                                    i === node.data.sessions.length - 1
+                                        ? { ...s, duration: (now - s.startTime) / 1000 }
+                                        : s
+                                )
+                                : node.data.sessions
                         },
                     }
                     : node

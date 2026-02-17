@@ -12,7 +12,7 @@ const DEFAULT_NODES: RevisionNode[] = [
         id: 'root-1',
         type: 'revision',
         position: { x: 250, y: 50 },
-        data: { label: 'My Studies', type: 'subject', totalTime: 0, isRunning: false },
+        data: { label: 'My Studies', type: 'subject', totalTime: 0, sessions: [], isRunning: false },
     },
 ];
 
@@ -33,7 +33,7 @@ export const createNodeSlice: StateCreator<RevisionState, [], [], NodeSlice> = (
             id,
             type: 'revision',
             position: { x: Math.random() * 400, y: Math.random() * 400 + 100 },
-            data: { label, type, totalTime: 0, isRunning: false },
+            data: { label, type, totalTime: 0, sessions: [], isRunning: false },
         };
 
         const newEdges = parentId

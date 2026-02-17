@@ -4,6 +4,9 @@ A visual, tree-based revision tracking application. Organize your subjects, brea
 
 ![Apercu de SessTracker](docs/image.png)
 
+## Demo
+![SessTracker Demo](docs/demo-activate-scroll.webp)
+
 ## Features
 
 ### Visual Revision Tree
