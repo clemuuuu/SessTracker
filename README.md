@@ -1,83 +1,88 @@
-# SessTracker (Revision Tracker)
+# SessTracker
 
 A visual, tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
 
-
-
-![Aperçu de SessTracker](image.png)
+![Apercu de SessTracker](image.png)
 
 ## Features
 
-### 🌳 Visual Revision Tree
-- **Hierarchical Organization**: Create root "Subjects" and child "Topics".
-- **Infinite Nesting**: Break down topics into sub-topics as deep as you need.
-- **Auto-Layout**: "Auto Layout" button organizes your tree instantly using the Dagre algorithm.
+### Visual Revision Tree
 
-### ⏱️ Smart Time Tracking
-- **Individual Timers**: Each node has its own stopwatch.
-- **Recursive Accumulation**: Time spent on a child topic **automatically adds up** to all its parent subjects.
-- **Visual Feedback**:
-    -   🟢 **Active Node**: Glows Green.
-    -   🔵 **Accumulating Parents**: Glow Blue to show the "active path".
-    -   (Accumulating text badge appears on parent nodes).
+- **Hierarchical organization** -- Create root subjects and child topics, with infinite nesting.
+- **Auto-layout** -- Organize the tree automatically using the Dagre algorithm.
+- **Recursive deletion** -- Deleting a node removes all its descendants.
+- **Inline renaming** -- Click on a node label to rename it.
 
-### 🌿 Organic 3D Background
--   **Living Environment**: A generative fractal tree grows in the background, connecting your knowledge nodes.
--   **Reactive Lighting**: The active study path lights up in **Gold** from the roots to the leaf, visualizing the flow of focus.
--   **Stable & Smooth**: Uses deterministic rendering to ensure a smooth, non-jittery experience.
+### Smart Time Tracking
 
-### 💾 Persistence & Safety
-- **Auto-Save**: All progress is saved to `localStorage` in real-time.
-- **Data Safety**: Server configured to strict port `5173` to prevent data loss perception.
+- **Individual timers** -- Each node has its own stopwatch.
+- **Recursive accumulation** -- Time spent on a child topic automatically adds up to all its parents.
+- **Visual feedback** -- Active node glows green, accumulating parents glow blue to show the active path.
+
+### Organic 3D Background
+
+- **Generative fractal tree** -- A deterministic fractal tree grows in the background, connecting knowledge nodes.
+- **Reactive lighting** -- The active study path lights up in gold from root to leaf.
+
+### Persistence
+
+- Auto-save to `localStorage` on every state change.
+- Server locked to port `5173` to keep `localStorage` consistent across sessions.
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
+
+- Node.js v18+
 - npm
 
 ### Installation
 
-1.  Clone the repository.
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
+```bash
+git clone <repo-url>
+cd SessTracker
+npm install
+```
 
-### Running the App
+### Development
 
 ```bash
 npm run dev
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## Technologies
-- **React 18** + **TypeScript** + **Vite**
-- **React Flow** (Visualization)
-- **Zustand** (State Management & Persistence)
-- **TailwindCSS** (Styling)
-- **Framer Motion** (Animations)
+Open [http://localhost:5173](http://localhost:5173).
+
+## Tech Stack
+
+| Category         | Tool                          |
+| ---------------- | ----------------------------- |
+| Framework        | React 18 + TypeScript + Vite  |
+| Visualization    | React Flow (`@xyflow/react`)  |
+| State management | Zustand (with persistence)    |
+| Styling          | TailwindCSS v4                |
+| Animations       | Framer Motion                 |
+| Layout engine    | Dagre                         |
+| Icons            | Lucide React                  |
 
 ## Project Structure
 
 ```
-/src
-  /components
-    /nodes
-      RevisionNode.tsx       # Custom Node component with Timer & Controls
-    /ui
-      (Reserved for generic UI components)
-    FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
-    BackgroundTree.tsx       # Canvas component for the Organic 3D Background
-  /hooks
-    useAutoLayout.ts         # Hook using Dagre to organize the tree
-  /store
-    useRevisionStore.ts      # Main Zustand store (Nodes, Edges, Timer logic, Persistence)
-  /types
-    index.ts                 # Shared TypeScript interfaces (RevisionNode, SubjectType)
-  /utils
-    (Reserved for helpers)
-  App.tsx                    # Main entry point, sets up React Flow provider
-  main.tsx                   # React root
-  index.css                  # Global styles & Tailwind imports
+src/
+├── components/
+│   ├── nodes/
+│   │   └── RevisionNode.tsx        # Node component (timer, controls, renaming)
+│   ├── BackgroundTree.tsx          # Canvas fractal tree background
+│   └── FloatingControls.tsx        # Top-left controls (add subject, reset view, save status)
+├── hooks/
+│   └── useAutoLayout.ts            # Dagre-based auto-layout hook
+├── store/
+│   └── useRevisionStore.ts         # Zustand store (nodes, edges, timers, persistence)
+├── types/
+│   └── index.ts                    # Shared TypeScript interfaces
+├── utils/
+│   └── graphHelpers.ts             # Graph traversal (ancestors, parent map, depth)
+├── App.tsx                         # Entry point, React Flow provider
+├── App.css
+├── index.css                       # Global styles + Tailwind imports
+└── main.tsx
 ```
