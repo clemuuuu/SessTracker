@@ -3,6 +3,8 @@
 ## Overview
 SessTracker is a web application designed to track revision sessions using a visual, tree-based interface. It helps users organize subjects and topics hierarchically and track time spent on each.
 
+![alt text](image.png)
+
 ## Technology Stack
 - **Framework**: React 18 + TypeScript + Vite
 - **Styling**: TailwindCSS v4 + Framer Motion (animations)
@@ -10,6 +12,8 @@ SessTracker is a web application designed to track revision sessions using a vis
 - **State Management**: Zustand (with persistence middleware)
 - **Icons**: Lucide React
 - **Layout Engine**: Dagre (for auto-layout)
+
+![Overview](image-1.png)
 
 ## Project Structure
 ```
@@ -19,7 +23,10 @@ SessTracker is a web application designed to track revision sessions using a vis
       RevisionNode.tsx       # Custom Node component with Timer & Controls
     /ui
       (Reserved for generic UI components)
+    /ui
+      (Reserved for generic UI components)
     FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
+    BackgroundTree.tsx       # Canvas component for the Organic 3D Background
   /hooks
     useAutoLayout.ts         # Hook using Dagre to organize the tree
   /store
@@ -70,6 +77,31 @@ SessTracker is a web application designed to track revision sessions using a vis
     -   Active Node: Green border/glow.
     -   Ancestors: Blue border/glow + "(Accumulating)" badge.
 
+### Background Fractal Tree (v1.2)
+-   **Technology**: HTML5 Canvas + Recursive Function.
+-   **Design**: "Organic 3D" style using:
+    -   **Bezier Curves**: For natural, non-linear branches.
+    -   **Variable Widths**: Tapering branches to simulate depth.
+    -   **Gradient/Shadows**: Gold glow for active paths, Slate silhouette for inactive.
+-   **Stability**: Replaced `Math.random()` with a **deterministic hash function** based on node IDs. This ensures the tree looks organic but remains pixel-perfectly static across re-renders (fixing the "jitter" issue).
+-   **Logic**:
+    -   A "Virtual Root" draws a main trunk from the bottom.
+    -   It branches out to the user's "Root Subjects".
+    -   Then recursively follows the React Flow edges (`activeAncestorIds` determines the glow).
+
 ## Known Implementation Details
 - **Port**: Configured to strictly use port `5173` to prevent data "loss" (since localStorage is origin-bound).
 - **Auto-Save**: The "Auto-saved" badge is purely visual feedback; saving happens synchronously on every state change.
+
+## Git Workflow (Reminder)
+
+```bash
+# 1. Add modified files
+git add .
+
+# 2. Commit
+git commit -m "Your message"
+
+# 3. Push
+git push
+```

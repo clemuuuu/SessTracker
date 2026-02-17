@@ -7,6 +7,7 @@ import { useRevisionStore } from './store/useRevisionStore';
 import { RevisionNode } from './components/nodes/RevisionNode';
 import { FloatingControls } from './components/FloatingControls';
 import { useAutoLayout } from './hooks/useAutoLayout';
+import { BackgroundTree } from './components/BackgroundTree';
 
 const nodeTypes: NodeTypes = {
   revision: RevisionNode,
@@ -33,7 +34,15 @@ function App() {
   }, [tickCallback]);
 
   return (
-    <div className="w-screen h-screen bg-gray-900 text-white overflow-hidden">
+    <div className="relative w-screen h-screen text-white overflow-hidden bg-gray-900">
+      {/* Background Layers */}
+      <div className="absolute inset-0 z-0">
+        {/* Gradient */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/40 via-gray-900 to-gray-900"></div>
+        {/* Fractal Tree */}
+        <BackgroundTree />
+      </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -42,10 +51,10 @@ function App() {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView
-        className="bg-gray-900"
+        className="relative z-10 bg-transparent"
       >
         <FloatingControls />
-        <Background gap={20} size={1} color="#444" />
+        <Background gap={20} size={1} color="#444" className="opacity-20" />
         <Controls className="bg-white/10 border-white/20 text-white" />
         <Panel position="top-right">
           <button
@@ -57,11 +66,9 @@ function App() {
           </button>
         </Panel>
       </ReactFlow>
-
-      {/* Background Gradient Mesh (Visual Flair) */}
-      <div className="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/40 via-gray-900 to-gray-900"></div>
     </div>
   );
+
 }
 
 export default App;

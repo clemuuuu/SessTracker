@@ -2,7 +2,7 @@
 
 A visual, tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
 
-![Visual Path Highlighting](/home/clem/.gemini/antigravity/brain/2d449b41-0200-4f8d-b7b2-fa0ef03d960d/verification_success_1771286083610.png)
+
 
 ## Features
 
@@ -17,6 +17,12 @@ A visual, tree-based revision tracking application. Organize your subjects, brea
 - **Visual Feedback**:
     -   🟢 **Active Node**: Glows Green.
     -   🔵 **Accumulating Parents**: Glow Blue to show the "active path".
+    -   (Accumulating text badge appears on parent nodes).
+
+### 🌿 Organic 3D Background
+-   **Living Environment**: A generative fractal tree grows in the background, connecting your knowledge nodes.
+-   **Reactive Lighting**: The active study path lights up in **Gold** from the roots to the leaf, visualizing the flow of focus.
+-   **Stable & Smooth**: Uses deterministic rendering to ensure a smooth, non-jittery experience.
 
 ### 💾 Persistence & Safety
 - **Auto-Save**: All progress is saved to `localStorage` in real-time.
