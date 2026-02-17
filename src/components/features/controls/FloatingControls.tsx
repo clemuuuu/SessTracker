@@ -1,6 +1,6 @@
 import { Plus, Layout, Save, Undo2, Redo2 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
-import { useRevisionStore } from '../store/useRevisionStore';
+import { useRevisionStore } from '../../../store/useRevisionStore';
 
 export function FloatingControls() {
     const { addNode, undo, redo, canUndo, canRedo } = useRevisionStore();

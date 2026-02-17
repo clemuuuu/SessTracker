@@ -5,9 +5,9 @@ import { Layout } from 'lucide-react';
 
 import { useRevisionStore } from './store/useRevisionStore';
 import { RevisionNode } from './components/nodes/RevisionNode';
-import { FloatingControls } from './components/FloatingControls';
+import { FloatingControls } from './components/features/controls/FloatingControls';
 import { useAutoLayout } from './hooks/useAutoLayout';
-import { BackgroundTree } from './components/BackgroundTree';
+import { BackgroundTree } from './components/features/background/BackgroundTree';
 
 const nodeTypes: NodeTypes = {
   revision: RevisionNode,

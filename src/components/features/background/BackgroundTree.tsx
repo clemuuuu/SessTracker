@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
-import { useRevisionStore } from '../store/useRevisionStore';
-import { type RevisionNode } from '../types';
+import { useRevisionStore } from '../../../store/useRevisionStore';
+import { type RevisionNode } from '../../../types';
 
 export function BackgroundTree() {
     const canvasRef = useRef<HTMLCanvasElement>(null);

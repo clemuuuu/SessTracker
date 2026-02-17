@@ -3,7 +3,7 @@
 ## Overview
 SessTracker is a web application designed to track revision sessions using a visual, tree-based interface. It helps users organize subjects and topics hierarchically and track time spent on each.
 
-![alt text](image.png)
+![alt text](docs/image.png)
 
 ## Technology Stack
 - **Framework**: React 18 + TypeScript + Vite
@@ -15,27 +15,35 @@ SessTracker is a web application designed to track revision sessions using a vis
 
 
 ## Project Structure
-```
 /src
   /components
+    /features
+      /background
+        BackgroundTree.tsx       # Canvas component for the Organic 3D Background
+      /controls
+        FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
     /nodes
-      RevisionNode.tsx       # Custom Node component with Timer & Controls
+      RevisionNode.tsx           # Custom Node component with Timer & Controls
     /ui
       (Reserved for generic UI components)
-    FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
-    BackgroundTree.tsx       # Canvas component for the Organic 3D Background
   /hooks
-    useAutoLayout.ts         # Hook using Dagre to organize the tree
+    useAutoLayout.ts             # Hook using Dagre to organize the tree
   /store
-    useRevisionStore.ts      # Main Zustand store (Nodes, Edges, Timer logic, Persistence)
+    /slices                      # Modular store logic (slices)
+      historySlice.ts
+      nodeSlice.ts
+      timerSlice.ts
+      types.ts
+    useRevisionStore.ts          # Main Zustand store combining slices
   /types
-    index.ts                 # Shared TypeScript interfaces (RevisionNode, SubjectType)
+    index.ts                     # Shared TypeScript interfaces
   /utils
-    graphHelpers.ts          # Graph traversal utilities (getAncestorIds, buildParentMap, getNodeDepth)
-  App.tsx                    # Main entry point, sets up React Flow provider
-  main.tsx                   # React root
-  index.css                  # Global styles & Tailwind imports
-```
+    /__tests__                   # Unit tests
+      graphHelpers.test.ts
+    graphHelpers.ts              # Graph traversal utilities
+  App.tsx                        # Main entry point
+  main.tsx                       # React root
+  index.css                      # Global styles
 
 ## Key Features
 1.  **Visual Revision Tree**:
@@ -63,6 +71,7 @@ SessTracker is a web application designed to track revision sessions using a vis
 ## Setup & Commands
 - **Install**: `npm install`
 - **Run**: `npm run dev` (Forces port 5173 defined in `vite.config.ts`)
+- **Test**: `npm test` (Runs Vitest unit tests)
 - **Build**: `npm run build`
 
 ## New Features (v1.1)

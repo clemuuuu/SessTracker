@@ -2,7 +2,7 @@
 
 A visual, tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
 
-![Apercu de SessTracker](image.png)
+![Apercu de SessTracker](docs/image.png)
 
 ## Features
 
@@ -71,21 +71,31 @@ Open [http://localhost:5173](http://localhost:5173).
 │   └── vite.svg
 ├── src/
 │   ├── components/
+│   │   ├── features/
+│   │   │   ├── background/
+│   │   │   │   └── BackgroundTree.tsx  # Canvas fractal tree
+│   │   │   └── controls/
+│   │   │       └── FloatingControls.tsx # Top-left controls
 │   │   ├── nodes/
-│   │   │   └── RevisionNode.tsx        # Node component (timer, controls, renaming)
-│   │   ├── BackgroundTree.tsx          # Canvas fractal tree background
-│   │   └── FloatingControls.tsx        # Top-left controls (add subject, reset view, save status)
+│   │   │   └── RevisionNode.tsx        # Node component
+│   │   └── ui/                         # Shared UI components
 │   ├── hooks/
-│   │   └── useAutoLayout.ts            # Dagre-based auto-layout hook
+│   │   └── useAutoLayout.ts            # Dagre-based auto-layout
 │   ├── store/
-│   │   └── useRevisionStore.ts         # Zustand store (nodes, edges, timers, persistence)
+│   │   ├── slices/                     # Store slices (modular logic)
+│   │   │   ├── historySlice.ts
+│   │   │   ├── nodeSlice.ts
+│   │   │   ├── timerSlice.ts
+│   │   │   └── types.ts
+│   │   └── useRevisionStore.ts         # Main store
 │   ├── types/
-│   │   └── index.ts                    # Shared TypeScript interfaces
+│   │   └── index.ts                    # Shared interfaces
 │   ├── utils/
-│   │   └── graphHelpers.ts             # Graph traversal (ancestors, parent map, depth)
-│   ├── App.tsx                         # Entry point, React Flow provider
+│   │   ├── __tests__/                  # Unit tests
+│   │   └── graphHelpers.ts             # Graph traversal logic
+│   ├── App.tsx
 │   ├── App.css
-│   ├── index.css                       # Global styles + Tailwind imports
+│   ├── index.css
 │   └── main.tsx
 ├── index.html                          # HTML entry point
 ├── vite.config.ts                      # Vite config (port 5173)
