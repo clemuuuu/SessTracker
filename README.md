@@ -57,3 +57,27 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 - **Zustand** (State Management & Persistence)
 - **TailwindCSS** (Styling)
 - **Framer Motion** (Animations)
+
+## Project Structure
+
+```
+/src
+  /components
+    /nodes
+      RevisionNode.tsx       # Custom Node component with Timer & Controls
+    /ui
+      (Reserved for generic UI components)
+    FloatingControls.tsx     # Top-left controls (Add Subject, Reset View, Save status)
+    BackgroundTree.tsx       # Canvas component for the Organic 3D Background
+  /hooks
+    useAutoLayout.ts         # Hook using Dagre to organize the tree
+  /store
+    useRevisionStore.ts      # Main Zustand store (Nodes, Edges, Timer logic, Persistence)
+  /types
+    index.ts                 # Shared TypeScript interfaces (RevisionNode, SubjectType)
+  /utils
+    (Reserved for helpers)
+  App.tsx                    # Main entry point, sets up React Flow provider
+  main.tsx                   # React root
+  index.css                  # Global styles & Tailwind imports
+```
