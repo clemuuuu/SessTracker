@@ -43,14 +43,15 @@ export const createNodeSlice: StateCreator<RevisionState, [], [], NodeSlice> = (
             ]
             : state.edges;
 
-        const newState = {
+        const nextState = {
+            ...state,
             nodes: [...state.nodes, newNode],
             edges: newEdges,
         };
 
         set({
-            ...newState,
-            ...state.pushHistory({ ...state, ...newState }),
+            ...nextState,
+            ...state.pushHistory(nextState),
         });
     },
 
@@ -62,9 +63,12 @@ export const createNodeSlice: StateCreator<RevisionState, [], [], NodeSlice> = (
             const newNodes = state.nodes.map((node) =>
                 node.id === id ? { ...node, data: { ...node.data, label: trimmed } } : node
             );
+
+            const nextState = { ...state, nodes: newNodes };
+
             return {
-                nodes: newNodes,
-                ...state.pushHistory({ ...state, nodes: newNodes }),
+                ...nextState,
+                ...state.pushHistory(nextState),
             };
         });
     },
@@ -94,12 +98,17 @@ export const createNodeSlice: StateCreator<RevisionState, [], [], NodeSlice> = (
             const newNodes = nodes.filter((n) => !idsToDelete.has(n.id));
             const newEdges = edges.filter((e) => !idsToDelete.has(e.source) && !idsToDelete.has(e.target));
 
-            return {
+            const nextState = {
+                ...state,
                 nodes: newNodes,
                 edges: newEdges,
                 activeNodeId: idsToDelete.has(state.activeNodeId || '') ? null : state.activeNodeId,
                 activeAncestorIds: idsToDelete.has(state.activeNodeId || '') ? [] : state.activeAncestorIds,
-                ...state.pushHistory({ ...state, nodes: newNodes, edges: newEdges }),
+            };
+
+            return {
+                ...nextState,
+                ...state.pushHistory(nextState),
             };
         });
     },

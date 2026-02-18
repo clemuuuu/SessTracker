@@ -104,7 +104,25 @@ SessTracker is a web application designed to track revision sessions using a vis
 ## Known Implementation Details
 - **Port**: Configured to strictly use port `5173` to prevent data "loss" (since localStorage is origin-bound).
 - **Auto-Save**: The "Auto-saved" badge is purely visual feedback; saving happens synchronously on every state change.
-- **Roots Background Opacity**: Implemented using **local component state** (`useState`) in `RootsView.tsx` rather than the global Zustand store. This decision was made to avoid circular dependency issues and to keep the UI-specific logic isolated and lightweight. The slider controls the opacity of the amber gradient overlay (0 to 1).
+- **Roots Background Opacity**: Implemented using **local component state** (`useState`) in `RootsView.tsx` with a vertical slider.
+- **Scroll Management**: Replaced imperative `document.getElementById` calls with a custom event-driven architecture (`scrollToRoots`, `scrollToTree`) handled centrally in `App.tsx`.
+
+## New Features & Refactoring (v1.3)
+
+### Window System
+-   **Interactive UI**: "Session Statistics" is now hosted in a movable, resizable `WindowFrame` component.
+-   **Opacity Control**: Users can adjust the transparency of the statistics window to view the background tree behind it.
+-   **Tech**: Powered by `framer-motion` (drag controls) and custom resize logic.
+
+### Performance & Architecture
+-   **Shared Canvas Logic**: `BackgroundTree` and `RootsBackground` now share a single custom hook `useTreeCanvas.ts`.
+    -   **DPR Support**: Canvas now renders sharply on High-DPI (Retina) screens.
+    -   **Optimization**: Tree construction algorithm optimized from $O(n^2)$ to $O(n)$ using Maps.
+    -   **Memory Safety**: Fixed event listener leaks in resize handlers.
+-   **State Improvements**:
+    -   `RevisionNode` uses **controlled inputs** for robust label editing.
+    -   `nodeSlice` history management was refactored for clarity and reliability.
+-   **Dependencies**: Corrected `@types/dagre` placement and removed `as any` type assertions.
 
 ## Git Workflow (Reminder)
 

@@ -36,12 +36,38 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo]);
 
+  useEffect(() => {
+    const handleScrollToRoots = () => {
+      const container = document.getElementById('app-scroll-container');
+      if (container) container.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+    };
+    const handleScrollToTree = () => {
+      const container = document.getElementById('app-scroll-container');
+      if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('scrollToRoots', handleScrollToRoots);
+    window.addEventListener('scrollToTree', handleScrollToTree);
+
+    return () => {
+      window.removeEventListener('scrollToRoots', handleScrollToRoots);
+      window.removeEventListener('scrollToTree', handleScrollToTree);
+    };
+  }, []);
+
   return (
-    <div id="app-scroll-container" className="w-screen h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth">
+    <div
+      id="app-scroll-container"
+      className="w-screen h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth"
+    >
       <MainTree />
       <RootsView />
     </div>
   );
 }
+
+// Global scroll handler effect could be here or inside App
+// Let's add it inside App
+
 
 export default App;

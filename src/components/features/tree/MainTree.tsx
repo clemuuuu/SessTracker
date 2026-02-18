@@ -58,10 +58,7 @@ export function MainTree() {
             {/* Scroll Hint */}
             <div
                 onClick={() => {
-                    const rootsView = document.getElementById('roots-view');
-                    if (rootsView) {
-                        rootsView.scrollIntoView({ behavior: 'smooth' });
-                    }
+                    window.dispatchEvent(new Event('scrollToRoots'));
                 }}
                 className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity"
             >

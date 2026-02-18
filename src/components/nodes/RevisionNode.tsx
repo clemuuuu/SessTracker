@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Plus, Trash2 } from 'lucide-react';
@@ -14,6 +15,12 @@ const formatTime = (seconds: number) => {
 
 export function RevisionNode({ id, data }: NodeProps<RevisionNodeType>) {
     const { toggleTimer, addNode, deleteNode, updateNodeLabel, activeAncestorIds } = useRevisionStore();
+    const [localLabel, setLocalLabel] = useState(data.label);
+
+    useEffect(() => {
+        setLocalLabel(data.label);
+    }, [data.label]);
+
     const isSubject = data.type === 'subject';
     // Check if this node is an ancestor of the currently running node
     const isAccumulating = activeAncestorIds.includes(id);
@@ -49,13 +56,13 @@ export function RevisionNode({ id, data }: NodeProps<RevisionNodeType>) {
             <div className="mb-3">
                 <input
                     className="bg-transparent text-lg font-bold text-white w-full outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1"
-                    defaultValue={data.label}
+                    value={localLabel}
+                    onChange={(e) => setLocalLabel(e.target.value)}
                     maxLength={60}
                     onBlur={(e) => {
-                        const trimmed = e.target.value.trim();
+                        const trimmed = localLabel.trim();
                         if (!trimmed) {
-                            // Restore original label if empty
-                            e.target.value = data.label;
+                            setLocalLabel(data.label);
                             return;
                         }
                         if (trimmed !== data.label) {

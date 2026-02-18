@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { RootsBackground } from '../background/RootsBackground';
 import { StatisticsPanel } from './StatisticsPanel';
 import { Layers } from 'lucide-react';
+import { WindowFrame } from '../../ui/WindowFrame';
 
 export function RootsView() {
     const [rootsBackgroundOpacity, setRootsBackgroundOpacity] = useState(0.8);
@@ -31,7 +32,7 @@ export function RootsView() {
                         value={rootsBackgroundOpacity}
                         onChange={(e) => setRootsBackgroundOpacity(parseFloat(e.target.value))}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        style={{ writingMode: 'vertical-lr', direction: 'rtl' } as any}
+                        style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
                     />
                     {/* Visual Indicator */}
                     <div
@@ -44,10 +45,7 @@ export function RootsView() {
             {/* Scroll Up Hint */}
             <div
                 onClick={() => {
-                    const container = document.getElementById('app-scroll-container');
-                    if (container) {
-                        container.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
+                    window.dispatchEvent(new Event('scrollToTree'));
                 }}
                 className="absolute top-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-amber-500/80 z-20 cursor-pointer hover:opacity-100 transition-opacity flex flex-col items-center"
             >
@@ -55,8 +53,10 @@ export function RootsView() {
                 <span className="text-xs">Back to Tree</span>
             </div>
 
-            {/* Content */}
-            <StatisticsPanel />
+            {/* Content: Windowed Statistics Panel */}
+            <WindowFrame title="Session Statistics" initialPos={{ x: 100, y: 100 }} initialSize={{ w: 800, h: 500 }}>
+                <StatisticsPanel />
+            </WindowFrame>
         </div>
     );
 }

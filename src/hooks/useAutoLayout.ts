@@ -15,7 +15,7 @@ export function useAutoLayout() {
         const dagreGraph = new dagre.graphlib.Graph();
         dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-        dagreGraph.setGraph({ rankdir: 'TB' }); // Top to Bottom
+        dagreGraph.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 80 }); // Top to Bottom, increased spacing
 
         nodes.forEach((node) => {
             dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });

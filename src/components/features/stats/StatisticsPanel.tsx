@@ -37,13 +37,13 @@ export function StatisticsPanel() {
     }
 
     return (
-        <div className="z-10 w-full max-w-4xl p-6 bg-black/40 backdrop-blur-md rounded-2xl border border-indigo-500/30">
-            <h2 className="text-2xl font-bold text-indigo-100 mb-2">{activeNode.data.label}</h2>
-            <div className="text-sm text-indigo-300 mb-6">
+        <div className="w-full h-full p-4 flex flex-col">
+            <h2 className="text-xl font-bold text-indigo-100 mb-1">{activeNode.data.label}</h2>
+            <div className="text-sm text-indigo-300 mb-4">
                 Total Time: {Math.round(activeNode.data.totalTime / 60)} mins
             </div>
 
-            <div className="h-[300px] w-full">
+            <div className="flex-1 w-full min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                         data={data}
