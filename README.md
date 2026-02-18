@@ -1,6 +1,6 @@
 # SessTracker
 
-A visual, tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
+A visual tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
 
 ![Tree View](docs/haut.png)
 
