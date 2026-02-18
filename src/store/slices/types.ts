@@ -37,4 +37,39 @@ export interface HistorySlice {
     pushHistory: (state: RevisionState) => Partial<RevisionState>;
 }
 
-export type RevisionState = NodeSlice & TimerSlice & HistorySlice;
+export interface TodoTask {
+    id: string;
+    text: string;
+    completed: boolean;
+    createdAt: number;
+}
+
+export interface TodoSlice {
+    todos: TodoTask[];
+    addTodo: (text: string) => void;
+    toggleTodo: (id: string) => void;
+    deleteTodo: (id: string) => void;
+}
+
+export interface WindowState {
+    id: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    zIndex: number;
+    isSnapped: 'float' | 'maximize' | 'left' | 'right' | 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    opacity: number;
+}
+
+export interface UiSlice {
+    windows: Record<string, WindowState>;
+    activeWindowId: string | null;
+    maxZIndex: number;
+    registerWindow: (id: string, config: { x: number; y: number; w: number; h: number }) => void;
+    updateWindow: (id: string, updates: Partial<WindowState>) => void;
+    focusWindow: (id: string) => void;
+    snapWindow: (id: string, input: 'left' | 'right' | 'up' | 'down') => void;
+}
+
+export type RevisionState = NodeSlice & TimerSlice & HistorySlice & TodoSlice & UiSlice;

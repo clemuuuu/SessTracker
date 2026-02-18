@@ -124,6 +124,21 @@ SessTracker is a web application designed to track revision sessions using a vis
     -   `nodeSlice` history management was refactored for clarity and reliability.
 -   **Dependencies**: Corrected `@types/dagre` placement and removed `as any` type assertions.
 
+
+### Hyprland-style Window Manager
+-   **Tiling & Snapping**: Windows can be snapped to screen halves (Left/Right) or quadrants (Top-Left, Bottom-Right, etc.) using `Ctrl+Shift+ArrowKey`.
+    -   **State Machine**: Logic handles complex transitions (e.g., Float -> Left -> Bottom-Left).
+    -   **Persistence**: Window positions, sizes, and opacity are saved in `localStorage`.
+    -   **Focus**: Clicking brings windows to front (z-index management).
+
+### General Objectives (To-Do List)
+-   **Integrated Tool**: A new persistent To-Do list window.
+-   **Transparency**: Fully adjustable opacity to blend with the background tree.
+
+### Shortcuts Documentation
+-   **Overlay**: A built-in help modal accessible via a UI button.
+-   **Extensible**: Shortcuts defined in `src/data/shortcuts.ts`.
+
 ## Git Workflow (Reminder)
 
 ```bash
