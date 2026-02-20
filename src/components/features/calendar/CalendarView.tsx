@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import GeometricForestBackground from '../background/GeometricForestBackground';
-import ForestUndergrowth from '../background/ForestUndergrowth';
-import SessionModal from './SessionModal';
+import { GeometricForestBackground } from '../background/GeometricForestBackground';
+import { ForestUndergrowth } from '../background/ForestUndergrowth';
+import { SessionModal } from './SessionModal';
 
 import { useRevisionStore } from '../../../store/useRevisionStore';
 
@@ -23,7 +23,7 @@ const addDays = (date: Date, days: number) => {
 
 // Helper: Format date to "LUN 19/02"
 const formatDayHeader = (date: Date) => {
-    const days = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const dayName = days[date.getDay()];
     const dayNum = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -44,8 +44,8 @@ const SESSION_COLORS: Record<string, string> = {
     'bg-indigo-500': 'bg-indigo-500/20 border-indigo-500/30 text-indigo-100',
 };
 
-const CalendarView = () => {
-    const { sessions, addSession, deleteSession } = useRevisionStore();
+export function CalendarView() {
+    const { calendarSessions, addSession, deleteSession, scrollToArea } = useRevisionStore();
     const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()));
 
     // Generate the 7 days of the current view
@@ -75,6 +75,7 @@ const CalendarView = () => {
         endTime: '10:00',
         initialColor: 'bg-amber-500'
     });
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const handleSlotClick = (dayIndex: number, dateStr: string) => {
         setModalData({
@@ -89,11 +90,6 @@ const CalendarView = () => {
     };
 
     const handleSaveSession = (title: string, startTime: string, endTime: string, color: string = 'bg-amber-500') => {
-        if (startTime >= endTime) {
-            alert("L'heure de fin doit être après l'heure de début.");
-            return;
-        }
-
         addSession({
             dayIndex: modalData.dayIndex,
             date: modalData.date, // Save the date!
@@ -108,9 +104,7 @@ const CalendarView = () => {
 
     const handleSessionClick = (e: React.MouseEvent, sessionId: string) => {
         e.stopPropagation();
-        if (window.confirm("Supprimer cette session ?")) {
-            deleteSession(sessionId);
-        }
+        setConfirmDeleteId(sessionId);
     };
 
     // Decorative hours for the scale (00:00 to 24:00 with 3h steps)
@@ -130,7 +124,7 @@ const CalendarView = () => {
                     <button
                         onClick={() => navigateWeek('prev')}
                         className="p-2 hover:bg-white/10 rounded-md transition-colors text-slate-300 hover:text-white"
-                        title="Semaine précédente"
+                        title="Previous Week"
                     >
                         <ChevronLeft size={20} />
                     </button>
@@ -141,23 +135,23 @@ const CalendarView = () => {
                             px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2
                             ${isCurrentWeek ? 'bg-indigo-500/20 text-indigo-300' : 'hover:bg-white/10 text-slate-300'}
                         `}
-                        title="Revenir à aujourd'hui"
+                        title="Jump to Today"
                     >
                         <CalendarIcon size={14} />
-                        <span>Aujourd'hui</span>
+                        <span>Today</span>
                     </button>
 
                     <button
                         onClick={() => navigateWeek('next')}
                         className="p-2 hover:bg-white/10 rounded-md transition-colors text-slate-300 hover:text-white"
-                        title="Semaine suivante"
+                        title="Next Week"
                     >
                         <ChevronRight size={20} />
                     </button>
                 </div>
 
                 <div className="flex gap-6 text-sm font-mono text-slate-400">
-                    <div>Planifiez votre croissance.</div>
+                    <div>Plan your growth.</div>
                 </div>
             </div>
 
@@ -217,7 +211,7 @@ const CalendarView = () => {
                         const dateStr = toISODate(date);
                         const isToday = dateStr === toISODate(new Date());
 
-                        const daySessions = sessions.filter(s => {
+                        const daySessions = calendarSessions.filter(s => {
                             if (s.date) {
                                 return s.date === dateStr;
                             }
@@ -285,7 +279,7 @@ const CalendarView = () => {
             {/* Navigation Hint (Back to Tree) */}
             <div
                 onClick={() => {
-                    window.dispatchEvent(new Event('scrollToTreeHorizontal'));
+                    scrollToArea('treeHorizontal');
                 }}
                 className="absolute left-8 top-1/2 -translate-y-1/2 animate-bounce opacity-50 text-indigo-300 z-50 cursor-pointer hover:opacity-100 transition-opacity flex items-center gap-3"
             >
@@ -303,8 +297,19 @@ const CalendarView = () => {
                 initialEndTime={modalData.endTime}
                 initialColor={modalData.initialColor}
             />
+
+            {confirmDeleteId && (
+                <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-6 transform transition-all max-w-sm w-full">
+                        <h3 className="text-lg font-bold text-white mb-2">Delete session ?</h3>
+                        <p className="text-slate-400 mb-6 text-sm">Are you sure you want to delete this session? This action cannot be undone.</p>
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => setConfirmDeleteId(null)} className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors text-sm">Cancel</button>
+                            <button onClick={() => { deleteSession(confirmDeleteId); setConfirmDeleteId(null); }} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg shadow-lg shadow-red-500/20 transition-all text-sm">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-};
-
-export default CalendarView;
+}

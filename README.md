@@ -101,43 +101,60 @@ npm test
 │   ├── components/
 │   │   ├── features/
 │   │   │   ├── background/
-│   │   │   │   ├── BackgroundTree.tsx   # Upward fractal tree (gold)
-│   │   │   │   └── RootsBackground.tsx  # Downward fractal tree (indigo)
+│   │   │   │   ├── BackgroundTree.tsx              # Upward fractal tree (gold)
+│   │   │   │   ├── RootsBackground.tsx             # Downward fractal tree (indigo)
+│   │   │   │   ├── GeometricForestBackground.tsx   # 2D flat trees for calendar
+│   │   │   │   └── ForestUndergrowth.tsx           # Ground, bushes & flowers canvas
 │   │   │   ├── calendar/
 │   │   │   │   ├── CalendarView.tsx     # Dynamic weekly schedule view
-│   │   │   │   └── SessionModal.tsx     # Add/Edit session modal
+│   │   │   │   └── SessionModal.tsx     # Add/Edit session modal with inline validation
 │   │   │   ├── controls/
 │   │   │   │   └── FloatingControls.tsx # Add Subject, Reset View, Undo, Redo
 │   │   │   ├── stats/
 │   │   │   │   ├── RootsView.tsx        # Bottom screen: roots + stats window
-│   │   │   │   └── StatisticsPanel.tsx  # Recharts area chart
+│   │   │   │   └── StatisticsPanel.tsx  # Recharts area chart (lazy-loaded)
+│   │   │   ├── todo/
+│   │   │   │   ├── TodoListPanel.tsx    # General objectives list
+│   │   │   │   └── __tests__/
+│   │   │   │       └── TodoListPanel.test.tsx
 │   │   │   └── tree/
 │   │   │       └── MainTree.tsx         # Top screen: ReactFlow + background
 │   │   ├── nodes/
 │   │   │   └── RevisionNode.tsx         # Custom node: timer, label, controls
 │   │   └── ui/
-│   │       └── WindowFrame.tsx          # Draggable/resizable window component
+│   │       ├── WindowFrame.tsx          # Draggable/resizable window component
+│   │       └── ShortcutsOverlay.tsx     # Keyboard shortcuts modal
+│   ├── data/
+│   │   └── shortcuts.ts                # Keyboard shortcut definitions
 │   ├── hooks/
 │   │   ├── useAutoLayout.ts             # Dagre-based auto-layout
 │   │   └── useTreeCanvas.ts            # Shared Canvas2D fractal tree renderer
 │   ├── store/
 │   │   ├── slices/
+│   │   │   ├── calendarSlice.ts         # CRUD for scheduled sessions
 │   │   │   ├── historySlice.ts          # Undo/redo (50 snapshots max)
 │   │   │   ├── nodeSlice.ts             # CRUD operations on tree nodes
 │   │   │   ├── timerSlice.ts            # Timer toggle, tick, session tracking
-│   │   │   └── types.ts                 # Store type definitions
+│   │   │   ├── todoSlice.ts             # Todo list actions
+│   │   │   ├── uiSlice.ts              # Window management + scroll navigation
+│   │   │   └── types.ts                 # Store type definitions (6 slice interfaces)
 │   │   ├── __tests__/
-│   │   │   └── timerSlice.test.ts
-│   │   └── useRevisionStore.ts          # Main Zustand store (combines slices)
+│   │   │   ├── calendarSlice.test.ts
+│   │   │   ├── historySlice.test.ts
+│   │   │   ├── nodeSlice.test.ts
+│   │   │   ├── timerSlice.test.ts
+│   │   │   ├── todoSlice.test.ts
+│   │   │   └── uiSlice.test.ts
+│   │   └── useRevisionStore.ts          # Main Zustand store (combines 6 slices)
 │   ├── types/
 │   │   └── index.ts                     # RevisionNodeData, Session interfaces
 │   ├── utils/
 │   │   ├── __tests__/
 │   │   │   └── graphHelpers.test.ts
+│   │   ├── canvasGeometricUtils.ts      # Deterministic hash, 2D tree/horizon drawing
 │   │   └── graphHelpers.ts              # Tree traversal: ancestors, depth, parent map
 │   ├── App.tsx
-│   ├── App.css
-│   ├── index.css
+│   ├── index.css                        # Tailwind + global styles + .no-scrollbar
 │   └── main.tsx
 ├── index.html
 ├── vite.config.ts                       # Vite config (strict port 5173)

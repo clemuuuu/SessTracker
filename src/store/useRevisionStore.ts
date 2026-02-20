@@ -30,7 +30,7 @@ export const useRevisionStore = create<RevisionState>()(
                 // We persist windows to keep layout, excluding activeWindowId and maxZIndex to reset focus order slightly or keep it. 
                 // Let's persist windows.
                 windows: state.windows,
-                sessions: state.sessions,
+                calendarSessions: state.calendarSessions,
             }),
             onRehydrateStorage: () => (state) => {
                 if (state) {
@@ -55,11 +55,22 @@ export const useRevisionStore = create<RevisionState>()(
                         }));
                     }
 
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const anyState = state as any;
                     // Migration: Ensure sessions array exists and has endTime
-                    if (!Array.isArray(state.sessions)) {
-                        state.sessions = [];
-                    } else {
-                        state.sessions = state.sessions.map((s: any) => ({
+                    if (!Array.isArray(anyState.calendarSessions)) {
+                        // Fallback: Check if old 'sessions' exists in localStorage
+                        if (Array.isArray(anyState.sessions)) {
+                            anyState.calendarSessions = anyState.sessions;
+                            delete anyState.sessions;
+                        } else {
+                            anyState.calendarSessions = [];
+                        }
+                    }
+
+                    if (Array.isArray(anyState.calendarSessions)) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        anyState.calendarSessions = anyState.calendarSessions.map((s: any) => ({
                             ...s,
                             endTime: s.endTime || s.duration || s.startTime // Fallback migration
                         }));

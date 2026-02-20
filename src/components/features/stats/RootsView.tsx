@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { RootsBackground } from '../background/RootsBackground';
-import { StatisticsPanel } from './StatisticsPanel';
+const StatisticsPanel = lazy(() => import('./StatisticsPanel').then(m => ({ default: m.StatisticsPanel })));
 import { Layers, Keyboard } from 'lucide-react';
 import { WindowFrame } from '../../ui/WindowFrame';
 import { TodoListPanel } from '../todo/TodoListPanel';
@@ -10,7 +10,7 @@ import { ShortcutsOverlay } from '../../ui/ShortcutsOverlay';
 export function RootsView() {
     const [rootsBackgroundOpacity, setRootsBackgroundOpacity] = useState(0.8);
     const [showShortcuts, setShowShortcuts] = useState(false);
-    const { activeWindowId, snapWindow } = useRevisionStore();
+    const { activeWindowId, snapWindow, scrollToArea } = useRevisionStore();
 
     // Global Keyboard Shortcuts (Hyprland-like)
     useEffect(() => {
@@ -94,7 +94,7 @@ export function RootsView() {
             {/* Scroll Up Hint */}
             <div
                 onClick={() => {
-                    window.dispatchEvent(new Event('scrollToTree'));
+                    scrollToArea('tree');
                 }}
                 className="absolute top-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-amber-500/80 z-20 cursor-pointer hover:opacity-100 transition-opacity flex flex-col items-center"
             >
@@ -109,7 +109,9 @@ export function RootsView() {
                 initialPos={{ x: 100, y: 100 }}
                 initialSize={{ w: 800, h: 500 }}
             >
-                <StatisticsPanel />
+                <Suspense fallback={<div className="flex items-center justify-center w-full h-full text-indigo-300/50">Loading statistics...</div>}>
+                    <StatisticsPanel />
+                </Suspense>
             </WindowFrame>
 
             {/* Content: General To-Do List */}

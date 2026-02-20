@@ -30,7 +30,8 @@ export function WindowFrame({
     // Register window on mount
     useEffect(() => {
         registerWindow(id, { ...initialPos, ...initialSize });
-    }, [id, registerWindow, initialPos.x, initialPos.y, initialSize.w, initialSize.h]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, registerWindow]);
 
     // Handle Resize
     useEffect(() => {

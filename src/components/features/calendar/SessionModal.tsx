@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface SessionModalProps {
     isOpen: boolean;
@@ -33,7 +33,7 @@ const COLORS = [
     { name: 'Indigo', class: 'bg-indigo-500' },
 ];
 
-const SessionModal: React.FC<SessionModalProps> = ({
+export function SessionModal({
     isOpen,
     onClose,
     onSave,
@@ -41,33 +41,38 @@ const SessionModal: React.FC<SessionModalProps> = ({
     initialStartTime = '09:00',
     initialEndTime = '10:00',
     initialColor = 'bg-amber-500'
-}) => {
+}: SessionModalProps) {
     const [title, setTitle] = useState(initialTitle);
     const [startTime, setStartTime] = useState(initialStartTime);
     const [endTime, setEndTime] = useState(initialEndTime);
     const [selectedColor, setSelectedColor] = useState(initialColor);
+    const [error, setError] = useState('');
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
     // Reset state when modal opens
-    useEffect(() => {
+    if (isOpen !== prevIsOpen) {
+        setPrevIsOpen(isOpen);
         if (isOpen) {
             setTitle(initialTitle);
             setStartTime(initialStartTime);
             setEndTime(initialEndTime);
             setSelectedColor(initialColor);
+            setError('');
         }
-    }, [isOpen, initialTitle, initialStartTime, initialEndTime, initialColor]);
+    }
 
     if (!isOpen) return null;
 
     const handleSave = () => {
         if (!title.trim()) {
-            alert("Veuillez entrer un titre.");
+            setError("Please enter a title.");
             return;
         }
         if (startTime >= endTime) {
-            alert("L'heure de fin doit être après l'heure de début.");
+            setError("End time must be after start time.");
             return;
         }
+        setError('');
         onSave(title, startTime, endTime, selectedColor);
         onClose();
     };
@@ -76,18 +81,20 @@ const SessionModal: React.FC<SessionModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100">
                 <h2 className="text-xl font-bold text-white mb-6">
-                    {initialTitle ? 'Modifier la session' : 'Nouvelle session'}
+                    {initialTitle ? 'Edit Session' : 'New Session'}
                 </h2>
+
+                {error && <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 text-red-200 rounded-lg text-sm">{error}</div>}
 
                 <div className="space-y-4">
                     {/* Title Input */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1">Titre</label>
+                        <label className="block text-sm font-medium text-slate-400 mb-1">Title</label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="ex: Mathématiques"
+                            placeholder="e.g. Mathematics"
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             autoFocus
                         />
@@ -96,7 +103,7 @@ const SessionModal: React.FC<SessionModalProps> = ({
                     {/* Time Selects */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-1">Début</label>
+                            <label className="block text-sm font-medium text-slate-400 mb-1">Start</label>
                             <select
                                 value={startTime}
                                 onChange={(e) => setStartTime(e.target.value)}
@@ -108,7 +115,7 @@ const SessionModal: React.FC<SessionModalProps> = ({
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-1">Fin</label>
+                            <label className="block text-sm font-medium text-slate-400 mb-1">End</label>
                             <select
                                 value={endTime}
                                 onChange={(e) => setEndTime(e.target.value)}
@@ -123,7 +130,7 @@ const SessionModal: React.FC<SessionModalProps> = ({
 
                     {/* Color Picker */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">Couleur</label>
+                        <label className="block text-sm font-medium text-slate-400 mb-2">Color</label>
                         <div className="flex flex-wrap gap-3">
                             {COLORS.map((color) => (
                                 <button
@@ -147,18 +154,16 @@ const SessionModal: React.FC<SessionModalProps> = ({
                         onClick={onClose}
                         className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     >
-                        Annuler
+                        Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-105"
                     >
-                        Enregistrer
+                        Save
                     </button>
                 </div>
             </div>
         </div>
     );
-};
-
-export default SessionModal;
+}

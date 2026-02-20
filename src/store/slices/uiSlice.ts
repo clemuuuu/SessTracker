@@ -5,6 +5,8 @@ export const createUiSlice: StateCreator<RevisionState, [], [], UiSlice> = (set,
     windows: {},
     activeWindowId: null,
     maxZIndex: 10,
+    scrollTarget: null,
+    scrollToArea: (area) => set({ scrollTarget: area }),
 
     registerWindow: (id, config) => {
         const state = get();

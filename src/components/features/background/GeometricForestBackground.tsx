@@ -6,7 +6,7 @@ interface GeometricForestBackgroundProps {
     currentDayIndex: number;
 }
 
-const GeometricForestBackground: React.FC<GeometricForestBackgroundProps> = ({ currentDayIndex }) => {
+export const GeometricForestBackground: React.FC<GeometricForestBackgroundProps> = React.memo(({ currentDayIndex }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -88,6 +88,4 @@ const GeometricForestBackground: React.FC<GeometricForestBackgroundProps> = ({ c
             style={{ width: '100%', height: '100%' }}
         />
     );
-};
-
-export default React.memo(GeometricForestBackground);
+});

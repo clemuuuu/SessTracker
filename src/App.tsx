@@ -4,13 +4,15 @@ import '@xyflow/react/dist/style.css';
 import { useRevisionStore } from './store/useRevisionStore';
 import { RootsView } from './components/features/stats/RootsView';
 import { MainTree } from './components/features/tree/MainTree';
-import CalendarView from './components/features/calendar/CalendarView';
+import { CalendarView } from './components/features/calendar/CalendarView';
 
-function App() {
+export function App() {
   const {
     tickCallback,
     undo,
-    redo
+    redo,
+    scrollTarget,
+    scrollToArea
   } = useRevisionStore();
 
   // Timer tick effect
@@ -38,36 +40,24 @@ function App() {
   }, [undo, redo]);
 
   useEffect(() => {
-    const handleScrollToRoots = () => {
+    if (!scrollTarget) return;
+
+    if (scrollTarget === 'roots') {
       const container = document.getElementById('app-scroll-container');
       if (container) container.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-    };
-    const handleScrollToTree = () => {
+    } else if (scrollTarget === 'tree') {
       const container = document.getElementById('app-scroll-container');
       if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleScrollToCalendar = () => {
+    } else if (scrollTarget === 'calendar') {
       const container = document.getElementById('app-horizontal-scroll');
       if (container) container.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
-    };
-    const handleScrollToTreeHorizontal = () => {
+    } else if (scrollTarget === 'treeHorizontal') {
       const container = document.getElementById('app-horizontal-scroll');
       if (container) container.scrollTo({ left: 0, behavior: 'smooth' });
     }
 
-    window.addEventListener('scrollToRoots', handleScrollToRoots);
-    window.addEventListener('scrollToTree', handleScrollToTree);
-    window.addEventListener('scrollToCalendar', handleScrollToCalendar);
-    window.addEventListener('scrollToTreeHorizontal', handleScrollToTreeHorizontal);
-
-    return () => {
-      window.removeEventListener('scrollToRoots', handleScrollToRoots);
-      window.removeEventListener('scrollToTree', handleScrollToTree);
-      window.removeEventListener('scrollToCalendar', handleScrollToCalendar);
-      window.removeEventListener('scrollToTreeHorizontal', handleScrollToTreeHorizontal);
-    };
-  }, []);
+    scrollToArea(null);
+  }, [scrollTarget, scrollToArea]);
 
   return (
     <div
@@ -89,9 +79,3 @@ function App() {
     </div>
   );
 }
-
-// Global scroll handler effect could be here or inside App
-// Let's add it inside App
-
-
-export default App;

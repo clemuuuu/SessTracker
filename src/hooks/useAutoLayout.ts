@@ -9,9 +9,8 @@ const NODE_WIDTH = 250;
 const NODE_HEIGHT = 180;
 
 export function useAutoLayout() {
-    const { nodes, edges, setNodes, setEdges } = useRevisionStore();
-
     const onLayout = useCallback(() => {
+        const { nodes, edges, setNodes, setEdges } = useRevisionStore.getState();
         const dagreGraph = new dagre.graphlib.Graph();
         dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -44,7 +43,7 @@ export function useAutoLayout() {
         setNodes(layoutedNodes as RevisionNode[]);
         setEdges([...edges]); // Trigger update
 
-    }, [nodes, edges, setNodes, setEdges]);
+    }, []);
 
     return { onLayout };
 }

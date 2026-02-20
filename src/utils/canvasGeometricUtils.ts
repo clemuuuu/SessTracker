@@ -23,7 +23,7 @@ interface Draw2DTreeOptions {
 
 // Dessine un arbre 2D "Flat" (Empilement de formes géométriques)
 export const draw2DFlatTree = (options: Draw2DTreeOptions) => {
-    const { ctx, x, y, height, width, color, glowColor, isActive } = options;
+    const { ctx, x, y, height, width, glowColor, isActive } = options;
 
     // Configuration
     ctx.lineJoin = 'round';

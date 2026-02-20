@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { pseudoRandom } from '../../../utils/canvasGeometricUtils';
 
-const ForestUndergrowth: React.FC = () => {
+export const ForestUndergrowth: React.FC = React.memo(() => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -187,6 +187,4 @@ const ForestUndergrowth: React.FC = () => {
             style={{ width: '100%', height: '100%' }}
         />
     );
-};
-
-export default React.memo(ForestUndergrowth);
+});

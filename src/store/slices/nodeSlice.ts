@@ -32,7 +32,7 @@ export const createNodeSlice: StateCreator<RevisionState, [], [], NodeSlice> = (
         const newNode: RevisionNode = {
             id,
             type: 'revision',
-            position: { x: Math.random() * 400, y: Math.random() * 400 + 100 },
+            position: { x: 100 + (state.nodes.length * 30) % 300, y: 150 + (state.nodes.length * 20) % 200 },
             data: { label, type, totalTime: 0, sessions: [], isRunning: false },
         };
 

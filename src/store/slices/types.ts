@@ -70,6 +70,8 @@ export interface UiSlice {
     updateWindow: (id: string, updates: Partial<WindowState>) => void;
     focusWindow: (id: string) => void;
     snapWindow: (id: string, input: 'left' | 'right' | 'up' | 'down') => void;
+    scrollTarget: 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null;
+    scrollToArea: (area: 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null) => void;
 }
 
 export interface CalendarSession {
@@ -84,7 +86,7 @@ export interface CalendarSession {
 }
 
 export interface CalendarSlice {
-    sessions: CalendarSession[];
+    calendarSessions: CalendarSession[];
     addSession: (session: Omit<CalendarSession, 'id'>) => void;
     updateSession: (id: string, updates: Partial<CalendarSession>) => void;
     deleteSession: (id: string) => void;

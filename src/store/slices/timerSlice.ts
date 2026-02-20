@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { RevisionState, TimerSlice } from './types';
-import { getAncestorIds, getAncestorSet } from '../../utils/graphHelpers';
+import { getAncestorIds } from '../../utils/graphHelpers';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -107,7 +107,7 @@ export const createTimerSlice: StateCreator<RevisionState, [], [], TimerSlice> =
         const now = Date.now();
         const deltaSeconds = (now - state.lastTick) / 1000;
 
-        const nodesToUpdate = getAncestorSet(state.activeNodeId, state.edges);
+        const nodesToUpdate = new Set([state.activeNodeId, ...state.activeAncestorIds]);
 
         set({
             lastTick: now,

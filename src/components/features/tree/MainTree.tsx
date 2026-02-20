@@ -17,6 +17,7 @@ export function MainTree() {
         onNodesChange,
         onEdgesChange,
         onConnect,
+        scrollToArea,
     } = useRevisionStore();
 
     const { onLayout } = useAutoLayout();
@@ -59,7 +60,7 @@ export function MainTree() {
             {/* Scroll Hint (Roots) */}
             <div
                 onClick={() => {
-                    window.dispatchEvent(new Event('scrollToRoots'));
+                    scrollToArea('roots');
                 }}
                 className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity flex flex-col items-center"
             >
@@ -70,7 +71,7 @@ export function MainTree() {
             {/* Navigation Hint (Calendar) */}
             <div
                 onClick={() => {
-                    window.dispatchEvent(new Event('scrollToCalendar'));
+                    scrollToArea('calendar');
                 }}
                 className="absolute right-8 top-1/2 -translate-y-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity flex items-center gap-3"
             >

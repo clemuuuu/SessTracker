@@ -4,6 +4,7 @@ import { createTimerSlice } from '../slices/timerSlice';
 import { createHistorySlice } from '../slices/historySlice';
 import { createTodoSlice } from '../slices/todoSlice';
 import { createUiSlice } from '../slices/uiSlice';
+import { createCalendarSlice } from '../slices/calendarSlice';
 import { create } from 'zustand';
 import type { RevisionState } from '../slices/types';
 
@@ -19,6 +20,7 @@ const useTestStore = create<RevisionState>()((...a) => ({
     ...createHistorySlice(...a),
     ...createTodoSlice(...a),
     ...createUiSlice(...a),
+    ...createCalendarSlice(...a),
     history: [],
     historyIndex: 0,
     undo: () => { },

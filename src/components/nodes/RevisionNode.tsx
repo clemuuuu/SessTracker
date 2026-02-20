@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Plus, Trash2 } from 'lucide-react';
@@ -15,11 +15,13 @@ const formatTime = (seconds: number) => {
 
 export function RevisionNode({ id, data }: NodeProps<RevisionNodeType>) {
     const { toggleTimer, addNode, deleteNode, updateNodeLabel, activeAncestorIds } = useRevisionStore();
+    const [prevLabelProp, setPrevLabelProp] = useState(data.label);
     const [localLabel, setLocalLabel] = useState(data.label);
 
-    useEffect(() => {
+    if (data.label !== prevLabelProp) {
+        setPrevLabelProp(data.label);
         setLocalLabel(data.label);
-    }, [data.label]);
+    }
 
     const isSubject = data.type === 'subject';
     // Check if this node is an ancestor of the currently running node

@@ -44,17 +44,19 @@ export function TodoListPanel() {
                         className="group flex items-center gap-3 bg-gray-800/50 p-3 rounded hover:bg-gray-800 transition-colors border border-gray-700/30"
                     >
                         <button
+                            data-testid={`toggle-todo-${todo.id}`}
                             onClick={() => toggleTodo(todo.id)}
-                            className={`flex-shrink-0 transition-colors cursor-pointer ${todo.completed ? 'text-green-500' : 'text-gray-400 hover:text-gray-300'}`}
+                            className={`flex-shrink-0 transition-colors ${todo.completed ? 'text-emerald-400' : 'text-slate-500 hover:text-indigo-400'}`}
                         >
-                            {todo.completed ? <CheckCircle size={20} /> : <Circle size={20} />}
+                            {todo.completed ? <CheckCircle size={18} /> : <Circle size={18} />}
                         </button>
-                        <span className={`flex-1 text-sm ${todo.completed ? 'text-gray-500 line-through' : 'text-gray-200'}`}>
+                        <span className={`text-sm flex-1 transition-all ${todo.completed ? 'opacity-50 line-through text-slate-400' : 'text-slate-200'}`}>
                             {todo.text}
                         </span>
                         <button
+                            data-testid={`delete-todo-${todo.id}`}
                             onClick={() => deleteTodo(todo.id)}
-                            className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                         >
                             <Trash2 size={16} />
                         </button>
