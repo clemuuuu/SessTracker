@@ -11,12 +11,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.4",
     "@xyflow/react": "^12.10.0",
     "dagre": "^0.8.5",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.564.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
     "recharts": "^3.7.0",
     "uuid": "^13.0.0",
     "zustand": "^5.0.11"

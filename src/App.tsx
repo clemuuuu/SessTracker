@@ -5,6 +5,7 @@ import { useRevisionStore } from './store/useRevisionStore';
 import { RootsView } from './components/features/stats/RootsView';
 import { MainTree } from './components/features/tree/MainTree';
 import { CalendarView } from './components/features/calendar/CalendarView';
+import { Toaster } from 'react-hot-toast';
 
 export function App() {
   const {
@@ -74,6 +75,15 @@ export function App() {
         <div className="w-screen h-screen flex-shrink-0 snap-start relative overflow-hidden">
           <CalendarView />
         </div>
+        <Toaster position="bottom-right" toastOptions={{
+          style: {
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid #334155',
+          },
+          success: { iconTheme: { primary: '#10b981', secondary: '#1e293b' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#1e293b' } },
+        }} />
       </div>
       <RootsView />
     </div>

@@ -31,6 +31,7 @@ export const useRevisionStore = create<RevisionState>()(
                 // Let's persist windows.
                 windows: state.windows,
                 calendarSessions: state.calendarSessions,
+                pendingGoogleDeletions: state.pendingGoogleDeletions,
             }),
             onRehydrateStorage: () => (state) => {
                 if (state) {

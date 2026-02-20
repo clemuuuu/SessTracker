@@ -1,8 +1,12 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
+import { fetchGoogleEvents, createGoogleEvent, updateGoogleEvent, deleteGoogleEvent } from '../../../services/googleCalendar';
 import { GeometricForestBackground } from '../background/GeometricForestBackground';
 import { ForestUndergrowth } from '../background/ForestUndergrowth';
 import { SessionModal } from './SessionModal';
+import type { CalendarSession } from '../../../store/slices/types';
 
 import { useRevisionStore } from '../../../store/useRevisionStore';
 
@@ -30,9 +34,12 @@ const formatDayHeader = (date: Date) => {
     return { name: dayName, date: `${dayNum}/${month}` };
 };
 
-// Helper: Format YYYY-MM-DD for storage/comparison
+// Helper: Format YYYY-MM-DD for storage/comparison (respecting local timezone)
 const toISODate = (date: Date) => {
-    return date.toISOString().split('T')[0];
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 };
 
 const SESSION_COLORS: Record<string, string> = {
@@ -45,7 +52,11 @@ const SESSION_COLORS: Record<string, string> = {
 };
 
 export function CalendarView() {
-    const { calendarSessions, addSession, deleteSession, scrollToArea } = useRevisionStore();
+    const {
+        calendarSessions, addSession, updateSession, deleteSession,
+        scrollToArea, syncGoogleEvents, googleAccessToken, setGoogleAccessToken,
+        pendingGoogleDeletions, addPendingDeletion, clearPendingDeletion
+    } = useRevisionStore();
     const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()));
 
     // Generate the 7 days of the current view
@@ -68,7 +79,7 @@ export function CalendarView() {
     }, [currentWeekStart]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalData, setModalData] = useState<{ dayIndex: number; date?: string; title: string; startTime: string; endTime: string; initialColor?: string }>({
+    const [modalData, setModalData] = useState<{ sessionId?: string; dayIndex: number; date?: string; title: string; startTime: string; endTime: string; initialColor?: string }>({
         dayIndex: 0,
         title: '',
         startTime: '09:00',
@@ -79,6 +90,7 @@ export function CalendarView() {
 
     const handleSlotClick = (dayIndex: number, dateStr: string) => {
         setModalData({
+            sessionId: undefined,
             dayIndex, // Keep for legacy
             date: dateStr,
             title: '',
@@ -89,23 +101,181 @@ export function CalendarView() {
         setIsModalOpen(true);
     };
 
-    const handleSaveSession = (title: string, startTime: string, endTime: string, color: string = 'bg-amber-500') => {
-        addSession({
-            dayIndex: modalData.dayIndex,
-            date: modalData.date, // Save the date!
-            title,
-            startTime,
-            endTime,
-            color,
-            type: 'work'
-        });
-        setIsModalOpen(false);
+    const handleSaveSession = async (title: string, startTime: string, endTime: string, color: string = 'bg-amber-500') => {
+        try {
+            const dateStr = modalData.date || toISODate(addDays(currentWeekStart, modalData.dayIndex));
+
+            if (modalData.sessionId) {
+                // UPDATE flow
+                const existingSession = calendarSessions.find(s => s.id === modalData.sessionId);
+                let newGoogleEventId = undefined;
+
+                let isOfflineChange = true;
+                if (googleAccessToken) {
+                    try {
+                        if (existingSession?.googleEventId) {
+                            await updateGoogleEvent(googleAccessToken, existingSession.googleEventId, { title, date: dateStr, startTime, endTime, color });
+                            isOfflineChange = false;
+                        } else if (existingSession) {
+                            // It was a local session, but now we are synced, so we create it on Google
+                            const newEvent = await createGoogleEvent(googleAccessToken, { title, date: dateStr, startTime, endTime, color });
+                            newGoogleEventId = newEvent.id;
+                            isOfflineChange = false;
+                        }
+                    } catch (syncError) {
+                        console.error("Google sync update error:", syncError);
+                        // Don't block local update
+                        toast.error("Failed to update on Google, but saved locally as pending.");
+                    }
+                }
+
+                updateSession(modalData.sessionId, {
+                    title,
+                    startTime,
+                    endTime,
+                    color,
+                    needsGoogleSync: isOfflineChange,
+                    ...(newGoogleEventId ? { googleEventId: newGoogleEventId } : {})
+                });
+            } else {
+                // CREATE flow
+                let newGoogleEventId = undefined;
+                let isOfflineChange = true;
+                if (googleAccessToken) {
+                    try {
+                        const newEvent = await createGoogleEvent(googleAccessToken, { title, date: dateStr, startTime, endTime, color });
+                        newGoogleEventId = newEvent.id;
+                        isOfflineChange = false;
+                    } catch (syncError) {
+                        console.error("Google sync create error:", syncError);
+                        // Don't block local creation
+                        toast.error("Failed to save to Google, but saved locally as pending.");
+                    }
+                }
+
+                addSession({
+                    dayIndex: modalData.dayIndex,
+                    date: dateStr, // Save the date!
+                    title,
+                    startTime,
+                    endTime,
+                    color,
+                    type: 'work',
+                    needsGoogleSync: isOfflineChange,
+                    ...(newGoogleEventId ? { googleEventId: newGoogleEventId } : {})
+                });
+            }
+            toast.success("Saved to Calendar");
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Failed to save session to Google:", error);
+            toast.error("An error occurred while saving the session.");
+            setIsModalOpen(false); // Close anyway or alert user
+        }
     };
 
-    const handleSessionClick = (e: React.MouseEvent, sessionId: string) => {
+    const handleSessionClick = (e: React.MouseEvent, session: CalendarSession, dayIndex: number, dateStr: string) => {
         e.stopPropagation();
-        setConfirmDeleteId(sessionId);
+        setModalData({
+            sessionId: session.id,
+            dayIndex,
+            date: dateStr,
+            title: session.title,
+            startTime: session.startTime,
+            endTime: session.endTime,
+            initialColor: session.color || 'bg-amber-500'
+        });
+        setIsModalOpen(true);
     };
+
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const login = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            console.log("OAuth Success! Fetching events...");
+            setGoogleAccessToken(tokenResponse.access_token);
+            handleTokenReceived(tokenResponse.access_token);
+        },
+        onError: (error) => {
+            console.error('Login Failed:', error);
+            toast.error("Google login failed.");
+        },
+        scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly',
+    });
+
+    const handleTokenReceived = async (accessToken: string) => {
+        setIsSyncing(true);
+        try {
+            // --- 1. Flush Offline Queue ---
+            // Process pending deletions first
+            for (const googleEventId of pendingGoogleDeletions) {
+                try {
+                    await deleteGoogleEvent(accessToken, googleEventId);
+                    clearPendingDeletion(googleEventId);
+                    console.log(`Successfully flushed deletion of ${googleEventId}`);
+                } catch (err) {
+                    console.error(`Failed to flush deletion for ${googleEventId}`, err);
+                }
+            }
+
+            // Process pending creations/updates
+            const offlineSessions = calendarSessions.filter(s => s.needsGoogleSync);
+            for (const session of offlineSessions) {
+                if (!session.date) continue; // Safety check
+                try {
+                    if (session.googleEventId) {
+                        // Update existing Google Event
+                        await updateGoogleEvent(accessToken, session.googleEventId, {
+                            title: session.title,
+                            date: session.date,
+                            startTime: session.startTime,
+                            endTime: session.endTime,
+                            color: session.color || 'bg-cyan-500'
+                        });
+                        updateSession(session.id, { needsGoogleSync: false });
+                        console.log(`Successfully flushed update for ${session.title}`);
+                    } else {
+                        // Create a new Google Event from a purely local session that hasn't synced yet
+                        const newEvent = await createGoogleEvent(accessToken, {
+                            title: session.title,
+                            date: session.date,
+                            startTime: session.startTime,
+                            endTime: session.endTime,
+                            color: session.color || 'bg-cyan-500'
+                        });
+                        updateSession(session.id, { googleEventId: newEvent.id, needsGoogleSync: false });
+                        console.log(`Successfully flushed creation for ${session.title}`);
+                    }
+                } catch (err) {
+                    console.error(`Failed to flush session ${session.title}`, err);
+                }
+            }
+            if (pendingGoogleDeletions.length > 0 || offlineSessions.length > 0) {
+                toast.success(`Successfully restored ${pendingGoogleDeletions.length + offlineSessions.length} offline changes to Google!`);
+            }
+
+            // --- 2. Fetch Latest State ---
+            // Fetch events from 30 days ago to 30 days ahead
+            const timeMin = new Date();
+            timeMin.setDate(timeMin.getDate() - 30);
+            const timeMax = new Date();
+            timeMax.setDate(timeMax.getDate() + 30);
+
+            const data = await fetchGoogleEvents(accessToken, timeMin, timeMax);
+
+            if (data.items && data.items.length > 0) {
+                syncGoogleEvents(data.items);
+            }
+            toast.success("Calendar synced with Google!");
+        } catch (error) {
+            console.error("Error fetching Google Events:", error);
+            toast.error("Failed to fetch Google Events.");
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+
 
     // Decorative hours for the scale (00:00 to 24:00 with 3h steps)
     const hours = Array.from({ length: 9 }, (_, i) => i * 3); // 0, 3, 6, ... 24
@@ -150,7 +320,26 @@ export function CalendarView() {
                     </button>
                 </div>
 
-                <div className="flex gap-6 text-sm font-mono text-slate-400">
+                <div className="flex gap-4 text-sm font-mono text-slate-400 items-center">
+                    <button
+                        onClick={() => login()}
+                        disabled={isSyncing}
+                        className={`
+                            px-4 py-1.5 flex items-center gap-2 font-medium rounded-lg shadow-lg transition-all font-sans
+                            ${googleAccessToken
+                                ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20'
+                                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 shadow-black/20 border border-slate-700'
+                            }
+                        `}
+                    >
+                        {googleAccessToken ? (
+                            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" title="Connected to Google Calendar" />
+                        ) : (
+                            <div className="w-2 h-2 rounded-full bg-slate-500" title="Disconnected from Google Calendar" />
+                        )}
+                        <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} />
+                        <span>Google Sync</span>
+                    </button>
                     <div>Plan your growth.</div>
                 </div>
             </div>
@@ -253,7 +442,7 @@ export function CalendarView() {
                                         return (
                                             <div
                                                 key={session.id}
-                                                onClick={(e) => handleSessionClick(e, session.id)}
+                                                onClick={(e) => handleSessionClick(e, session, dayIndex, dateStr)}
                                                 style={style}
                                                 className={`
                                                     absolute left-1 right-1 rounded-md cursor-pointer border backdrop-blur-md transition-all hover:z-20 hover:scale-[1.02] shadow-lg
@@ -296,6 +485,7 @@ export function CalendarView() {
                 initialStartTime={modalData.startTime}
                 initialEndTime={modalData.endTime}
                 initialColor={modalData.initialColor}
+                onDelete={modalData.sessionId ? () => setConfirmDeleteId(modalData.sessionId!) : undefined}
             />
 
             {confirmDeleteId && (
@@ -305,7 +495,26 @@ export function CalendarView() {
                         <p className="text-slate-400 mb-6 text-sm">Are you sure you want to delete this session? This action cannot be undone.</p>
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setConfirmDeleteId(null)} className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors text-sm">Cancel</button>
-                            <button onClick={() => { deleteSession(confirmDeleteId); setConfirmDeleteId(null); }} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg shadow-lg shadow-red-500/20 transition-all text-sm">Delete</button>
+                            <button onClick={async () => {
+                                const sessionToDelete = confirmDeleteId ? calendarSessions.find(s => s.id === confirmDeleteId) : null;
+                                if (sessionToDelete?.googleEventId) {
+                                    if (googleAccessToken) {
+                                        try {
+                                            await deleteGoogleEvent(googleAccessToken, sessionToDelete.googleEventId);
+                                        } catch (e) {
+                                            console.error("Failed to delete from google", e);
+                                            toast.error("Failed to delete from Google, but removed locally and queued.");
+                                            addPendingDeletion(sessionToDelete.googleEventId);
+                                        }
+                                    } else {
+                                        // Offline deletion of a synced event
+                                        addPendingDeletion(sessionToDelete.googleEventId);
+                                        toast.success("Flagged for Google deletion on next sync.");
+                                    }
+                                }
+                                deleteSession(confirmDeleteId!);
+                                setConfirmDeleteId(null);
+                            }} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg shadow-lg shadow-red-500/20 transition-all text-sm">Delete</button>
                         </div>
                     </div>
                 </div>

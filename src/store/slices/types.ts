@@ -83,13 +83,21 @@ export interface CalendarSession {
     endTime: string; // "HH:MM"
     color?: string; // Hex code or Tailwind class
     type: 'work' | 'break' | 'other';
+    googleEventId?: string; // Track events mapped from Google Calendar
+    needsGoogleSync?: boolean; // Flag to indicate if session needs to be pushed to Google
 }
 
 export interface CalendarSlice {
     calendarSessions: CalendarSession[];
+    pendingGoogleDeletions: string[];
+    googleAccessToken: string | null;
+    setGoogleAccessToken: (token: string | null) => void;
     addSession: (session: Omit<CalendarSession, 'id'>) => void;
     updateSession: (id: string, updates: Partial<CalendarSession>) => void;
     deleteSession: (id: string) => void;
+    addPendingDeletion: (googleEventId: string) => void;
+    clearPendingDeletion: (googleEventId: string) => void;
+    syncGoogleEvents: (googleEvents: any[]) => void;
 }
 
 export type RevisionState = NodeSlice & TimerSlice & HistorySlice & TodoSlice & UiSlice & CalendarSlice;
