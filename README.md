@@ -6,6 +6,8 @@ A visual tree-based revision tracking application. Organize your subjects, break
 
 ![Roots & Statistics View](docs/racines.png)
 
+![Calendar View](docs/Calendar.png)
+
 ## Features
 
 ### Tree View (Top Screen)
@@ -29,6 +31,13 @@ A visual tree-based revision tracking application. Organize your subjects, break
 - **Session statistics** -- An interactive windowed panel (draggable, resizable, adjustable opacity) displays cumulative study time as an area chart.
 - **Background opacity control** -- A vertical slider adjusts the warm amber gradient behind the roots.
 - **Snap scroll** -- Scroll down from the tree view to reach the roots, or click the navigation hints.
+
+### Calendar View (Forest Scheduler)
+
+- **Weekly schedule** -- Dynamic, date-based calendar to plan your study sessions week by week.
+- **Easy navigation** -- Browse through previous and next weeks, or jump back to today.
+- **Visual time blocks** -- Sessions are displayed as color-coded blocks on a 24-hour time grid with Add/Edit support.
+- **Organic integration** -- Features a matching geometric forest background and snap scroll to the right of the main tree.
 
 ### Undo/Redo
 
@@ -94,6 +103,9 @@ npm test
 │   │   │   ├── background/
 │   │   │   │   ├── BackgroundTree.tsx   # Upward fractal tree (gold)
 │   │   │   │   └── RootsBackground.tsx  # Downward fractal tree (indigo)
+│   │   │   ├── calendar/
+│   │   │   │   ├── CalendarView.tsx     # Dynamic weekly schedule view
+│   │   │   │   └── SessionModal.tsx     # Add/Edit session modal
 │   │   │   ├── controls/
 │   │   │   │   └── FloatingControls.tsx # Add Subject, Reset View, Undo, Redo
 │   │   │   ├── stats/

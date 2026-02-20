@@ -72,4 +72,22 @@ export interface UiSlice {
     snapWindow: (id: string, input: 'left' | 'right' | 'up' | 'down') => void;
 }
 
-export type RevisionState = NodeSlice & TimerSlice & HistorySlice & TodoSlice & UiSlice;
+export interface CalendarSession {
+    id: string;
+    dayIndex: number; // 0-6 (Lun-Dim)
+    date?: string; // YYYY-MM-DD (ISO) - Optional for migration
+    title: string;
+    startTime: string; // "HH:MM"
+    endTime: string; // "HH:MM"
+    color?: string; // Hex code or Tailwind class
+    type: 'work' | 'break' | 'other';
+}
+
+export interface CalendarSlice {
+    sessions: CalendarSession[];
+    addSession: (session: Omit<CalendarSession, 'id'>) => void;
+    updateSession: (id: string, updates: Partial<CalendarSession>) => void;
+    deleteSession: (id: string) => void;
+}
+
+export type RevisionState = NodeSlice & TimerSlice & HistorySlice & TodoSlice & UiSlice & CalendarSlice;

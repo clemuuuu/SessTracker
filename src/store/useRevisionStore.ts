@@ -5,6 +5,7 @@ import { createNodeSlice } from './slices/nodeSlice';
 import { createTimerSlice } from './slices/timerSlice';
 import { createHistorySlice } from './slices/historySlice';
 import { createTodoSlice } from './slices/todoSlice';
+import { createCalendarSlice } from './slices/calendarSlice';
 import { createUiSlice } from './slices/uiSlice';
 
 export const useRevisionStore = create<RevisionState>()(
@@ -15,6 +16,7 @@ export const useRevisionStore = create<RevisionState>()(
             ...createHistorySlice(...a),
             ...createTodoSlice(...a),
             ...createUiSlice(...a),
+            ...createCalendarSlice(...a),
         }),
         {
             name: 'revision-tracker-storage',
@@ -28,6 +30,7 @@ export const useRevisionStore = create<RevisionState>()(
                 // We persist windows to keep layout, excluding activeWindowId and maxZIndex to reset focus order slightly or keep it. 
                 // Let's persist windows.
                 windows: state.windows,
+                sessions: state.sessions,
             }),
             onRehydrateStorage: () => (state) => {
                 if (state) {
@@ -49,6 +52,16 @@ export const useRevisionStore = create<RevisionState>()(
                                 ...node.data,
                                 sessions: Array.isArray(node.data.sessions) ? node.data.sessions : []
                             }
+                        }));
+                    }
+
+                    // Migration: Ensure sessions array exists and has endTime
+                    if (!Array.isArray(state.sessions)) {
+                        state.sessions = [];
+                    } else {
+                        state.sessions = state.sessions.map((s: any) => ({
+                            ...s,
+                            endTime: s.endTime || s.duration || s.startTime // Fallback migration
                         }));
                     }
                 }

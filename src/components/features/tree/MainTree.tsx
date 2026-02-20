@@ -48,22 +48,35 @@ export function MainTree() {
                     <button
                         onClick={onLayout}
                         className="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-lg border border-gray-600 shadow-lg transition-colors flex items-center gap-2"
+                        title="Auto Layout"
                     >
                         <Layout size={16} />
-                        Auto Layout
                     </button>
+                    {/* Calendar button moved to floating edge */}
                 </Panel>
             </ReactFlow>
 
-            {/* Scroll Hint */}
+            {/* Scroll Hint (Roots) */}
             <div
                 onClick={() => {
                     window.dispatchEvent(new Event('scrollToRoots'));
                 }}
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity"
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity flex flex-col items-center"
             >
                 <span className="text-xs">Scroll for Roots & Stats</span>
-                <div className="w-6 h-6 border-2 border-indigo-300 rounded-full border-t-0 border-l-0 rotate-45 mx-auto mt-1"></div>
+                <div className="w-6 h-6 border-2 border-indigo-300 rounded-full border-t-0 border-l-0 rotate-45 mt-1"></div>
+            </div>
+
+            {/* Navigation Hint (Calendar) */}
+            <div
+                onClick={() => {
+                    window.dispatchEvent(new Event('scrollToCalendar'));
+                }}
+                className="absolute right-8 top-1/2 -translate-y-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity flex items-center gap-3"
+            >
+                <span className="text-xs font-mono uppercase tracking-widest hidden md:block">Calendar</span>
+                {/* Arrow pointing Right: border-t and border-r visible, rotated 45 deg */}
+                <div className="w-6 h-6 border-2 border-indigo-300 rounded-full border-b-0 border-l-0 rotate-45 transform rotate-[-90deg]"></div>
             </div>
         </div>
     );

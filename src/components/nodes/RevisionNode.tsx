@@ -59,7 +59,7 @@ export function RevisionNode({ id, data }: NodeProps<RevisionNodeType>) {
                     value={localLabel}
                     onChange={(e) => setLocalLabel(e.target.value)}
                     maxLength={60}
-                    onBlur={(e) => {
+                    onBlur={() => {
                         const trimmed = localLabel.trim();
                         if (!trimmed) {
                             setLocalLabel(data.label);

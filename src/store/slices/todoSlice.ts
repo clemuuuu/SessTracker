@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import type { RevisionState, TodoSlice, TodoTask } from './types';
+import type { RevisionState, TodoSlice } from './types';
 
 export const createTodoSlice: StateCreator<RevisionState, [], [], TodoSlice> = (set) => ({
     todos: [],

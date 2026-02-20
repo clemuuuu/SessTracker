@@ -26,6 +26,9 @@ SessTracker is a web application designed to track revision sessions using a vis
       /stats                     # Statistics and Roots view
         RootsView.tsx            # Bottom section container
         StatisticsPanel.tsx      # Charts and data visualization
+      /calendar                  # Calendar/Schedule view
+        CalendarView.tsx         # Weekly schedule view
+        SessionModal.tsx         # Add/Edit session modal
       /tree                      # Main Tree view
         MainTree.tsx             # Top section container
     /nodes
@@ -39,6 +42,7 @@ SessTracker is a web application designed to track revision sessions using a vis
       historySlice.ts
       nodeSlice.ts
       timerSlice.ts
+      calendarSlice.ts           # Calendar session management
       types.ts
     useRevisionStore.ts          # Main Zustand store combining slices
   /types
@@ -107,37 +111,62 @@ SessTracker is a web application designed to track revision sessions using a vis
 - **Roots Background Opacity**: Implemented using **local component state** (`useState`) in `RootsView.tsx` with a vertical slider.
 - **Scroll Management**: Replaced imperative `document.getElementById` calls with a custom event-driven architecture (`scrollToRoots`, `scrollToTree`) handled centrally in `App.tsx`.
 
-## New Features & Refactoring (v1.3)
+## Architecture Deep Dive
 
-### Window System
--   **Interactive UI**: "Session Statistics" is now hosted in a movable, resizable `WindowFrame` component.
--   **Opacity Control**: Users can adjust the transparency of the statistics window to view the background tree behind it.
--   **Tech**: Powered by `framer-motion` (drag controls) and custom resize logic.
+### 1. Store Structure (Zustand)
+The application state is centralized in `useRevisionStore` which combines multiple slices:
+-   **`nodeSlice`**: Manages the graph structure (Nodes & Edges). Handles recursive deletion and label updates.
+-   **`timerSlice`**: Handles the stopwatch logic.
+    -   **`tickCallback`**: The heartbeat of the app. Updates `totalTime` for the active node and all its ancestors (recursive accumulation).
+    -   **`activeAncestorIds`**: Cached list of ancestors for the currently running node to optimize rendering (O(1) lookup during renders).
+-   **`historySlice`**: Implements Undo/Redo logic by snapshotting `nodes` and `edges` states.
+-   **`uiSlice`**: Manages the Window Manager state (position, size, z-index, minimization, snapping) for floating windows.
+-   **`calendarSlice`**: Manages dynamic, date-based weekly schedule sessions (`CalendarSession`).
+-   **`todoSlice`**: Simple valid/invalid state for the "General Objectives" list.
 
-### Performance & Architecture
--   **Shared Canvas Logic**: `BackgroundTree` and `RootsBackground` now share a single custom hook `useTreeCanvas.ts`.
-    -   **DPR Support**: Canvas now renders sharply on High-DPI (Retina) screens.
-    -   **Optimization**: Tree construction algorithm optimized from $O(n^2)$ to $O(n)$ using Maps.
-    -   **Memory Safety**: Fixed event listener leaks in resize handlers.
--   **State Improvements**:
-    -   `RevisionNode` uses **controlled inputs** for robust label editing.
-    -   `nodeSlice` history management was refactored for clarity and reliability.
--   **Dependencies**: Corrected `@types/dagre` placement and removed `as any` type assertions.
+### 2. Rendering & Layout
+-   **Main Tree**: Uses `React Flow` for the node graph.
+    -   **Auto-Layout**: `dagre` algorithm calculates node positions hierarchically.
+    -   **Nodes (`RevisionNode.tsx`)**: framer-motion components with local state for performant input handling. Visual feedback (Green border = Running, Blue border = Accumulating).
+-   **Backgrounds**:
+    -   **`BackgroundTree`**: A recursive fractal tree drawn on HTML5 Canvas. Deterministic generation based on node IDs ensures stability across renders.
+    -   **`RootsBackground`**: An inverted variant allowing opacity control for the "Roots" view.
+    -   **`GeometricForestBackground`**: Used in Calendar view, simpler geometric abstraction.
 
+### 3. Window System ("Hyprland-like")
+-   **`WindowFrame.tsx`**: A wrapper component providing:
+    -   Draggable header (framer-motion).
+    -   Resizable edges.
+    -   Opacity control (slider in header).
+    -   **Snapping**: `Ctrl+Shift+Arrow` or dragging to edges (logic in `uiSlice`).
+-   **Z-Index Management**: Clicking a window brings it to the front (`focusWindow`).
 
-### Hyprland-style Window Manager
--   **Tiling & Snapping**: Windows can be snapped to screen halves (Left/Right) or quadrants (Top-Left, Bottom-Right, etc.) using `Ctrl+Shift+ArrowKey`.
-    -   **State Machine**: Logic handles complex transitions (e.g., Float -> Left -> Bottom-Left).
-    -   **Persistence**: Window positions, sizes, and opacity are saved in `localStorage`.
-    -   **Focus**: Clicking brings windows to front (z-index management).
+### 4. Navigation & Views
+The app uses a spatial navigation model:
+-   **Vertical Scroll**:
+    -   **Top**: Main Tree (`MainTree.tsx`).
+    -   **Bottom**: Roots/Stats View (`RootsView.tsx`).
+-   **Horizontal Scroll** (from Main Tree):
+    -   **Right**: Calendar (`CalendarView.tsx`).
+-   **Navigation Helpers**:
+    -   Buttons trigger custom window events (`scrollToRoots`, `scrollToTreeHorizontal`, etc.) which `App.tsx` listens to for smooth scrolling.
 
-### General Objectives (To-Do List)
--   **Integrated Tool**: A new persistent To-Do list window.
--   **Transparency**: Fully adjustable opacity to blend with the background tree.
+## Feature Reference
 
-### Shortcuts Documentation
--   **Overlay**: A built-in help modal accessible via a UI button.
--   **Extensible**: Shortcuts defined in `src/data/shortcuts.ts`.
+### Calendar (Forest Scheduler)
+-   **Path**: `src/components/features/calendar/`
+-   **Features**: Dynamic date-based weekly view, navigation between weeks, Add/Edit sessions, Color coding, 24-hour time grid.
+-   **Data**: Sessions are tied to specific dates (YYYY-MM-DD) and persisted in the `sessions` array via `calendarSlice`.
+
+### Statistics (Roots)
+-   **Path**: `src/components/features/stats/`
+-   **Visualization**: `Recharts` AreaChart showing cumulative time over sessions for the selected node.
+
+### Keyboard Shortcuts
+-   **Undo**: `Ctrl+Z`
+-   **Redo**: `Ctrl+Y` or `Ctrl+Shift+Z`
+-   **Window Snapping**: `Ctrl+Shift+ArrowKeys` (when a window is focused)
+-   **Documentation**: Pressed via "Keyboard" icon in Roots view or defined in `src/data/shortcuts.ts`.
 
 ## Git Workflow (Reminder)
 

@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createTimerSlice } from '../slices/timerSlice';
 import { createNodeSlice } from '../slices/nodeSlice';
+import { createTimerSlice } from '../slices/timerSlice';
+import { createHistorySlice } from '../slices/historySlice';
+import { createTodoSlice } from '../slices/todoSlice';
+import { createUiSlice } from '../slices/uiSlice';
 import { create } from 'zustand';
 import type { RevisionState } from '../slices/types';
 
@@ -13,6 +16,9 @@ vi.mock('../../utils/graphHelpers', () => ({
 const useTestStore = create<RevisionState>()((...a) => ({
     ...createNodeSlice(...a),
     ...createTimerSlice(...a),
+    ...createHistorySlice(...a),
+    ...createTodoSlice(...a),
+    ...createUiSlice(...a),
     history: [],
     historyIndex: 0,
     undo: () => { },

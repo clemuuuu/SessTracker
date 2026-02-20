@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTreeCanvas } from '../../../hooks/useTreeCanvas';
 
 export function BackgroundTree() {
+    const [isVisible, setIsVisible] = useState(true);
+
     const options = useMemo(() => ({
         direction: 'up' as const,
         startPosition: 'bottom-center' as const,
@@ -16,7 +18,23 @@ export function BackgroundTree() {
             : { stroke: 'rgba(51, 65, 85, 0.4)', shadow: 'transparent', blur: 0, lineWidth: 40 } // Slate-700
     }), []);
 
-    const canvasRef = useTreeCanvas(options);
+    const canvasRef = useTreeCanvas(options, isVisible);
+
+    // Optimisation: Pauser le rendu quand l'arbre n'est pas à l'écran
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { threshold: 0.1 } // Marge de 10%
+        );
+
+        if (canvasRef.current) {
+            observer.observe(canvasRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [canvasRef]);
 
     return (
         <canvas

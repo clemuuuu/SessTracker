@@ -15,7 +15,7 @@ interface TreeCanvasOptions {
     initialWidth: number;
 }
 
-export function useTreeCanvas(options: TreeCanvasOptions) {
+export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = true) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { nodes, edges, activeNodeId, activeAncestorIds } = useRevisionStore();
 
@@ -45,7 +45,7 @@ export function useTreeCanvas(options: TreeCanvasOptions) {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!canvas || !isVisible) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
@@ -166,7 +166,7 @@ export function useTreeCanvas(options: TreeCanvasOptions) {
             0
         );
 
-    }, [nodes, edges, activeNodeId, activeAncestorIds, options]);
+    }, [nodes, edges, activeNodeId, activeAncestorIds, options, isVisible]);
 
     return canvasRef;
 }
