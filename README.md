@@ -2,11 +2,7 @@
 
 A visual tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
 
-![Tree View](docs/haut.png)
-
-![Roots & Statistics View](docs/racines.png)
-
-![Calendar View](docs/Calendar.png)
+<video src="docs/demo.mp4" autoplay loop muted playsinline width="100%"></video>
 
 ## Features
 

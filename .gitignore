@@ -7,11 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+.planning/
+.claude/
 node_modules
 /dist
 dist-ssr
 *.local
 CLAUDE.md
+.agents/
 
 # Editor directories and files
 .vscode/*

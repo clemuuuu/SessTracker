@@ -4,6 +4,7 @@ import { useRevisionStore } from '../../../store/useRevisionStore';
 import { SkyBackground } from './SkyBackground';
 import { StarIcon } from './StarIcon';
 import { ShootingStars } from './ShootingStars';
+import { StarListMenu } from './StarListMenu';
 
 export const SkyView: React.FC = () => {
     const { stars, addStar, updateStar, deleteStar, scrollToArea } = useRevisionStore();
@@ -183,6 +184,15 @@ export const SkyView: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Star List Sidebar */}
+            <StarListMenu
+                selectedStarId={selectedStarId}
+                setSelectedStarId={(id) => {
+                    setSelectedStarId(id);
+                    setInputVisible(false);
+                }}
+            />
 
             {/* Navigation hint to go down to tree */}
             <button
