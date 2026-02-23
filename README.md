@@ -2,7 +2,8 @@
 
 A visual tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
 
-<video src="https://github.com/clemuuuu/SessTracker/raw/main/docs/demo.mp4" autoplay loop muted controls playsinline width="100%"></video>
+https://github.com/user-attachments/assets/d2349f12-e25e-44fc-a974-b74414c74d6f
+
 
 ## Features
 
