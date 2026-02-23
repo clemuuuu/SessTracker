@@ -57,7 +57,18 @@ export function MainTree() {
                 </Panel>
             </ReactFlow>
 
-            {/* Scroll Hint (Roots) */}
+            {/* Scroll Hint (Sky View - Top) */}
+            <div
+                onClick={() => {
+                    scrollToArea('sky');
+                }}
+                className="absolute top-4 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-indigo-300 z-20 cursor-pointer hover:opacity-100 transition-opacity flex flex-col items-center"
+            >
+                <div className="w-6 h-6 border-2 border-indigo-300 rounded-full border-b-0 border-r-0 rotate-45 mb-1"></div>
+                <span className="text-xs uppercase tracking-widest font-semibold">Sky Objectives</span>
+            </div>
+
+            {/* Scroll Hint (Roots - Bottom) */}
             <div
                 onClick={() => {
                     scrollToArea('roots');

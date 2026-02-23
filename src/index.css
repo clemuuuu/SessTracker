@@ -42,3 +42,28 @@ body {
     /* Firefox */
   }
 }
+
+@keyframes shooting-star {
+  0% {
+    transform: rotate(135deg) translateX(0);
+    opacity: 0;
+  }
+
+  2% {
+    opacity: 1;
+  }
+
+  6% {
+    opacity: 0;
+  }
+
+  8% {
+    transform: rotate(135deg) translateX(1500px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: rotate(135deg) translateX(1500px);
+    opacity: 0;
+  }
+}

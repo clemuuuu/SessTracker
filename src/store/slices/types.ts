@@ -70,8 +70,8 @@ export interface UiSlice {
     updateWindow: (id: string, updates: Partial<WindowState>) => void;
     focusWindow: (id: string) => void;
     snapWindow: (id: string, input: 'left' | 'right' | 'up' | 'down') => void;
-    scrollTarget: 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null;
-    scrollToArea: (area: 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null) => void;
+    scrollTarget: 'sky' | 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null;
+    scrollToArea: (area: 'sky' | 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null) => void;
 }
 
 export interface CalendarSession {
@@ -100,4 +100,20 @@ export interface CalendarSlice {
     syncGoogleEvents: (googleEvents: any[]) => void;
 }
 
-export type RevisionState = NodeSlice & TimerSlice & HistorySlice & TodoSlice & UiSlice & CalendarSlice;
+export interface StarNodeData {
+    id: string;
+    text: string;
+    x: number;
+    y: number;
+    createdAt: number;
+    modelType: 'four-point' | 'eight-point' | 'sparkle' | 'classic';
+}
+
+export interface StarSlice {
+    stars: StarNodeData[];
+    addStar: (text: string, x: number, y: number, modelType?: StarNodeData['modelType']) => void;
+    updateStar: (id: string, updates: Partial<StarNodeData>) => void;
+    deleteStar: (id: string) => void;
+}
+
+export type RevisionState = NodeSlice & TimerSlice & HistorySlice & TodoSlice & UiSlice & CalendarSlice & StarSlice;

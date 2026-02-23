@@ -7,6 +7,7 @@ import { createHistorySlice } from './slices/historySlice';
 import { createTodoSlice } from './slices/todoSlice';
 import { createCalendarSlice } from './slices/calendarSlice';
 import { createUiSlice } from './slices/uiSlice';
+import { createStarSlice } from './slices/starSlice';
 
 export const useRevisionStore = create<RevisionState>()(
     persist(
@@ -17,6 +18,7 @@ export const useRevisionStore = create<RevisionState>()(
             ...createTodoSlice(...a),
             ...createUiSlice(...a),
             ...createCalendarSlice(...a),
+            ...createStarSlice(...a),
         }),
         {
             name: 'revision-tracker-storage',
@@ -32,6 +34,7 @@ export const useRevisionStore = create<RevisionState>()(
                 windows: state.windows,
                 calendarSessions: state.calendarSessions,
                 pendingGoogleDeletions: state.pendingGoogleDeletions,
+                stars: state.stars,
             }),
             onRehydrateStorage: () => (state) => {
                 if (state) {
@@ -43,6 +46,11 @@ export const useRevisionStore = create<RevisionState>()(
                     // Ensure windows object exists
                     if (!state.windows) {
                         state.windows = {};
+                    }
+
+                    // Migration: Ensure stars array exists
+                    if (!Array.isArray(state.stars)) {
+                        state.stars = [];
                     }
 
                     // Migration: Ensure all nodes have valid sessions array

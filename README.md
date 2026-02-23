@@ -10,7 +10,15 @@ A visual tree-based revision tracking application. Organize your subjects, break
 
 ## Features
 
-### Tree View (Top Screen)
+### Starry Sky View (Top Screen)
+
+- **Spatial objectives** -- Click anywhere on the sky to place a star representing a goal or objective.
+- **Star shapes** -- Choose between classic (5-point), four-point, eight-point, and sparkle star shapes.
+- **Interactive** -- Click a star to rename it, change its shape, or delete it. Hover to see the objective name.
+- **Atmospheric background** -- Aurora borealis effect, ambient stars, layered clouds, and shooting stars rendered on canvas.
+- **Responsive** -- Star positions are stored as percentages, so they adapt to any screen size.
+
+### Tree View (Middle Screen)
 
 - **Hierarchical organization** -- Create root subjects and nested topics, up to 10 levels deep.
 - **Auto-layout** -- Organize the tree automatically using the Dagre algorithm.
@@ -110,6 +118,11 @@ npm test
 │   │   │   │   └── SessionModal.tsx     # Add/Edit session modal with inline validation
 │   │   │   ├── controls/
 │   │   │   │   └── FloatingControls.tsx # Add Subject, Reset View, Undo, Redo
+│   │   │   ├── sky/
+│   │   │   │   ├── SkyView.tsx          # Sky screen: click-to-place star objectives
+│   │   │   │   ├── SkyBackground.tsx    # Canvas: aurora borealis + stars + clouds
+│   │   │   │   ├── ShootingStars.tsx    # CSS-animated shooting stars
+│   │   │   │   └── StarIcon.tsx         # SVG star shapes (4 variants)
 │   │   │   ├── stats/
 │   │   │   │   ├── RootsView.tsx        # Bottom screen: roots + stats window
 │   │   │   │   └── StatisticsPanel.tsx  # Recharts area chart (lazy-loaded)
@@ -118,7 +131,7 @@ npm test
 │   │   │   │   └── __tests__/
 │   │   │   │       └── TodoListPanel.test.tsx
 │   │   │   └── tree/
-│   │   │       └── MainTree.tsx         # Top screen: ReactFlow + background
+│   │   │       └── MainTree.tsx         # Middle screen: ReactFlow + background
 │   │   ├── nodes/
 │   │   │   └── RevisionNode.tsx         # Custom node: timer, label, controls
 │   │   └── ui/
@@ -128,24 +141,27 @@ npm test
 │   │   └── shortcuts.ts                # Keyboard shortcut definitions
 │   ├── hooks/
 │   │   ├── useAutoLayout.ts             # Dagre-based auto-layout
-│   │   └── useTreeCanvas.ts            # Shared Canvas2D fractal tree renderer
+│   │   ├── useCanvas.ts                 # Shared DPR-aware Canvas2D hook
+│   │   └── useTreeCanvas.ts            # Specialized fractal tree Canvas2D renderer
 │   ├── store/
 │   │   ├── slices/
 │   │   │   ├── calendarSlice.ts         # CRUD for scheduled sessions
 │   │   │   ├── historySlice.ts          # Undo/redo (50 snapshots max)
 │   │   │   ├── nodeSlice.ts             # CRUD operations on tree nodes
+│   │   │   ├── starSlice.ts             # CRUD for sky star objectives
 │   │   │   ├── timerSlice.ts            # Timer toggle, tick, session tracking
 │   │   │   ├── todoSlice.ts             # Todo list actions
 │   │   │   ├── uiSlice.ts              # Window management + scroll navigation
-│   │   │   └── types.ts                 # Store type definitions (6 slice interfaces)
+│   │   │   └── types.ts                 # Store type definitions (7 slice interfaces)
 │   │   ├── __tests__/
 │   │   │   ├── calendarSlice.test.ts
 │   │   │   ├── historySlice.test.ts
 │   │   │   ├── nodeSlice.test.ts
+│   │   │   ├── starSlice.test.ts
 │   │   │   ├── timerSlice.test.ts
 │   │   │   ├── todoSlice.test.ts
 │   │   │   └── uiSlice.test.ts
-│   │   └── useRevisionStore.ts          # Main Zustand store (combines 6 slices)
+│   │   └── useRevisionStore.ts          # Main Zustand store (combines 7 slices)
 │   ├── types/
 │   │   └── index.ts                     # RevisionNodeData, Session interfaces
 │   ├── utils/
@@ -154,7 +170,7 @@ npm test
 │   │   ├── canvasGeometricUtils.ts      # Deterministic hash, 2D tree/horizon drawing
 │   │   └── graphHelpers.ts              # Tree traversal: ancestors, depth, parent map
 │   ├── App.tsx
-│   ├── index.css                        # Tailwind + global styles + .no-scrollbar
+│   ├── index.css                        # Tailwind + global styles + shooting-star keyframes
 │   └── main.tsx
 ├── index.html
 ├── vite.config.ts                       # Vite config (strict port 5173)

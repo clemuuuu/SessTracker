@@ -5,6 +5,7 @@ import { useRevisionStore } from './store/useRevisionStore';
 import { RootsView } from './components/features/stats/RootsView';
 import { MainTree } from './components/features/tree/MainTree';
 import { CalendarView } from './components/features/calendar/CalendarView';
+import { SkyView } from './components/features/sky/SkyView';
 import { Toaster } from 'react-hot-toast';
 
 export function App() {
@@ -43,12 +44,15 @@ export function App() {
   useEffect(() => {
     if (!scrollTarget) return;
 
-    if (scrollTarget === 'roots') {
-      const container = document.getElementById('app-scroll-container');
-      if (container) container.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-    } else if (scrollTarget === 'tree') {
+    if (scrollTarget === 'sky') {
       const container = document.getElementById('app-scroll-container');
       if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (scrollTarget === 'tree') {
+      const container = document.getElementById('app-scroll-container');
+      if (container) container.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+    } else if (scrollTarget === 'roots') {
+      const container = document.getElementById('app-scroll-container');
+      if (container) container.scrollTo({ top: window.innerHeight * 2, behavior: 'smooth' });
     } else if (scrollTarget === 'calendar') {
       const container = document.getElementById('app-horizontal-scroll');
       if (container) container.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
@@ -60,11 +64,21 @@ export function App() {
     scrollToArea(null);
   }, [scrollTarget, scrollToArea]);
 
+  // Initial mount scroll: start at the Tree View (middle)
+  useEffect(() => {
+    const container = document.getElementById('app-scroll-container');
+    if (container) {
+      // Use 'auto' instead of 'instant' for better cross-browser compatibility
+      container.scrollTo({ top: window.innerHeight, behavior: 'auto' });
+    }
+  }, []);
+
   return (
     <div
       id="app-scroll-container"
       className="w-screen h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth"
     >
+      <SkyView />
       <div
         id="app-horizontal-scroll"
         className="w-screen h-screen flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth no-scrollbar relative z-10 snap-start"
