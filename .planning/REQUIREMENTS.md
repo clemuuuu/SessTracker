@@ -59,29 +59,29 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TREE-01 | TBD | Pending |
-| TREE-02 | TBD | Pending |
-| TREE-03 | TBD | Pending |
-| TREE-04 | TBD | Pending |
-| TREE-05 | TBD | Pending |
-| ENV-01 | TBD | Pending |
-| ENV-02 | TBD | Pending |
-| ENV-03 | TBD | Pending |
-| ENV-04 | TBD | Pending |
-| ROOT-01 | TBD | Pending |
-| ROOT-02 | TBD | Pending |
-| ROOT-03 | TBD | Pending |
-| ROOT-04 | TBD | Pending |
-| STAT-01 | TBD | Pending |
-| STAT-02 | TBD | Pending |
-| STAT-03 | TBD | Pending |
-| STAT-04 | TBD | Pending |
+| TREE-01 | Phase 3 | Pending |
+| TREE-02 | Phase 2 | Pending |
+| TREE-03 | Phase 1 | Pending |
+| TREE-04 | Phase 3 | Pending |
+| TREE-05 | Phase 2 | Pending |
+| ENV-01 | Phase 4 | Pending |
+| ENV-02 | Phase 4 | Pending |
+| ENV-03 | Phase 4 | Pending |
+| ENV-04 | Phase 4 | Pending |
+| ROOT-01 | Phase 5 | Pending |
+| ROOT-02 | Phase 5 | Pending |
+| ROOT-03 | Phase 5 | Pending |
+| ROOT-04 | Phase 5 | Pending |
+| STAT-01 | Phase 6 | Pending |
+| STAT-02 | Phase 6 | Pending |
+| STAT-03 | Phase 6 | Pending |
+| STAT-04 | Phase 6 | Pending |
 
 **Coverage:**
 - v1.0 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17
+- Mapped to phases: 17
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 after initial definition*
+*Last updated: 2026-02-23 after roadmap creation*
