@@ -57,18 +57,28 @@ export const StarListMenu: React.FC<StarListMenuProps> = ({ selectedStarId, setS
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         className="w-80 h-full bg-slate-900/95 backdrop-blur-xl border-l border-amber-500/30 shadow-2xl flex flex-col pointer-events-auto relative overflow-hidden"
                     >
-                        {/* Static Golden Shooting Star Background Effect */}
-                        <div className="absolute inset-0 pointer-events-none opacity-20" style={{
+                        {/* Celestial Golden and Viridian Background Effect */}
+                        <div className="absolute inset-0 pointer-events-none opacity-50 mix-blend-screen" style={{
                             backgroundImage: `
-                                radial-gradient(1px 1px at 20% 30%, #fde047, transparent),
+                                /* Soft Aurora Nebulae */
+                                radial-gradient(ellipse at 80% 0%, rgba(253, 224, 71, 0.15), transparent 50%),
+                                radial-gradient(ellipse at 0% 100%, rgba(64, 130, 109, 0.2), transparent 50%),
+                                radial-gradient(circle at 30% 30%, rgba(64, 130, 109, 0.1), transparent 40%),
+                                /* Astrolabe celestial rings */
+                                radial-gradient(circle at 100% 0%, transparent 60%, rgba(253, 224, 71, 0.1) 60.5%, transparent 61%),
+                                radial-gradient(circle at 0% 100%, transparent 40%, rgba(64, 130, 109, 0.15) 40.5%, transparent 41%),
+                                radial-gradient(circle at 50% 50%, transparent 45%, rgba(253, 224, 71, 0.05) 45.5%, transparent 46%),
+                                /* Existing Stars */
+                                radial-gradient(1.5px 1.5px at 20% 30%, #fde047, transparent),
                                 radial-gradient(1px 1px at 50% 80%, #fde047, transparent),
                                 radial-gradient(2px 2px at 80% 20%, #fde047, transparent),
-                                radial-gradient(1.5px 1.5px at 10% 60%, #fde047, transparent),
+                                radial-gradient(1.5px 1.5px at 10% 60%, rgba(64, 130, 109, 1), transparent),
                                 radial-gradient(1px 1px at 70% 90%, #fde047, transparent),
-                                linear-gradient(45deg, transparent 40%, rgba(245,158,11,0.1) 45%, rgba(253,224,71,0.4) 50%, rgba(245,158,11,0.1) 55%, transparent 60%)
+                                /* Celestial Ray */
+                                linear-gradient(45deg, transparent 40%, rgba(64,130,109,0.1) 45%, rgba(253,224,71,0.3) 50%, rgba(245,158,11,0.1) 55%, transparent 60%)
                             `,
-                            backgroundSize: '100px 100px, 150px 150px, 200px 200px, 120px 120px, 180px 180px, 200% 200%',
-                            backgroundPosition: '0 0, 0 0, 0 0, 0 0, 0 0, -50% -50%'
+                            backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100px 100px, 150px 150px, 200px 200px, 120px 120px, 180px 180px, 200% 200%',
+                            backgroundPosition: '0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, -50% -50%'
                         }} />
 
                         <div className="relative p-6 border-b border-amber-500/20 flex items-center justify-between z-10 bg-gradient-to-b from-slate-900/50 to-transparent">
