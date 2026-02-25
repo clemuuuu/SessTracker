@@ -468,13 +468,24 @@ export function CalendarView() {
             {/* Navigation Hint (Back to Tree) */}
             <div
                 onClick={() => {
-                    scrollToArea('treeHorizontal');
+                    scrollToArea('tree');
                 }}
                 className="absolute left-8 top-1/2 -translate-y-1/2 animate-bounce opacity-50 text-indigo-300 z-50 cursor-pointer hover:opacity-100 transition-opacity flex items-center gap-3"
             >
                 {/* Arrow pointing Left: border-t and border-l visible, rotated 45 deg */}
-                <div className="w-6 h-6 border-2 border-indigo-300 rounded-full border-b-0 border-r-0 rotate-[-45deg] transform"></div>
+                <div className="w-6 h-6 border-2 border-indigo-300 rounded-full border-b-0 border-r-0 rotate-[-45deg]"></div>
                 <span className="text-xs font-mono uppercase tracking-widest hidden md:block">Back to Tree</span>
+            </div>
+
+            {/* Navigation Hint (Down to Underground) */}
+            <div
+                onClick={() => {
+                    scrollToArea('underground');
+                }}
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce opacity-50 text-stone-400 z-50 cursor-pointer hover:opacity-100 transition-opacity flex flex-col items-center gap-1"
+            >
+                <span className="text-xs font-mono uppercase tracking-widest bg-[#0B0F19]/80 px-2 py-0.5 rounded">Deep</span>
+                <div className="w-6 h-6 border-2 border-stone-400 rounded-full border-t-0 border-l-0 rotate-45"></div>
             </div>
 
             <SessionModal

@@ -95,7 +95,7 @@ const toLocalRFC3339 = (dateString: string, timeString: string) => {
 
 // Map Forest Scheduler tailwind colors to Google Calendar colorIds
 // Google Colors: 1: Lavender, 2: Sage, 3: Grape, 4: Flamingo, 5: Banana, 6: Tangerine, 7: Peacock, 8: Graphite, 9: Blueberry, 10: Basil, 11: Tomato
-export const mapLocalColorToGoogle = (localColor: string): string | undefined => {
+export const mapLocalColorToGoogle = (localColor?: string): string | undefined => {
     switch (localColor) {
         case 'bg-amber-500': return '6'; // Tangerine
         case 'bg-cyan-500': return '7'; // Peacock

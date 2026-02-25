@@ -70,8 +70,8 @@ export interface UiSlice {
     updateWindow: (id: string, updates: Partial<WindowState>) => void;
     focusWindow: (id: string) => void;
     snapWindow: (id: string, input: 'left' | 'right' | 'up' | 'down') => void;
-    scrollTarget: 'sky' | 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null;
-    scrollToArea: (area: 'sky' | 'roots' | 'tree' | 'calendar' | 'treeHorizontal' | null) => void;
+    scrollTarget: 'sky' | 'roots' | 'tree' | 'calendar' | 'underground' | null;
+    scrollToArea: (area: 'sky' | 'roots' | 'tree' | 'calendar' | 'underground' | null) => void;
 }
 
 export interface CalendarSession {

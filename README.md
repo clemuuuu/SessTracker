@@ -1,11 +1,25 @@
 # SessTracker
 
-A visual tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system.
+A visual tree-based revision tracking application. Organize your subjects, break them down into topics, and track your study time with a hierarchical timer system. Navigate a 2D world of five views — sky, tree, calendar, roots, and underground — using snap-scroll or arrow keys.
 
 https://github.com/user-attachments/assets/d2349f12-e25e-44fc-a974-b74414c74d6f
 
 
 ## Features
+
+### Navigation
+
+The app is laid out as a **2×3 grid** of full-screen views:
+
+|           | Left              | Right          |
+|-----------|-------------------|----------------|
+| **Top**   | Sky               | Sky            |
+| **Middle**| Tree Editor       | Calendar       |
+| **Bottom**| Roots & Stats     | Underground    |
+
+Navigate by scrolling, clicking the directional hints in each view, or using the **arrow keys** (no modifier needed).
+
+---
 
 ### Starry Sky View (Top Screen)
 
@@ -30,19 +44,24 @@ https://github.com/user-attachments/assets/d2349f12-e25e-44fc-a974-b74414c74d6f
 - **Visual feedback** -- Active node glows green, accumulating ancestors glow blue with an "(Accumulating)" badge.
 - **Session history** -- Each start/stop is recorded as a session with timestamps and duration.
 
-### Roots & Statistics View (Bottom Screen)
+### Roots & Statistics View (Bottom-Left Screen)
 
 - **Inverted root tree** -- A mirrored fractal tree grows downward, representing the "roots" of your knowledge.
 - **Session statistics** -- An interactive windowed panel (draggable, resizable, adjustable opacity) displays cumulative study time as an area chart.
-- **Background opacity control** -- A vertical slider adjusts the warm amber gradient behind the roots.
-- **Snap scroll** -- Scroll down from the tree view to reach the roots, or click the navigation hints.
+- **Background opacity control** -- A vertical slider on the left adjusts the warm amber gradient behind the roots.
 
-### Calendar View (Forest Scheduler)
+### Calendar View (Middle-Right Screen)
 
 - **Weekly schedule** -- Dynamic, date-based calendar to plan your study sessions week by week.
 - **Easy navigation** -- Browse through previous and next weeks, or jump back to today.
 - **Visual time blocks** -- Sessions are displayed as color-coded blocks on a 24-hour time grid with Add/Edit support.
-- **Organic integration** -- Features a matching geometric forest background and snap scroll to the right of the main tree.
+- **Organic integration** -- Features a matching geometric forest background.
+
+### Underground View (Bottom-Right Screen)
+
+- **Geological canvas** -- Four layered geological strata (dirt, rocky dirt, rocks, deep rock) rendered on canvas with pebbles, rock formations, and glowing cyan diamonds in the deepest layer.
+- **Cave galleries** -- Dark hollowed-out cave shapes distributed across the layers — future anchors for deep notes.
+- **Placeholder** -- Content for this screen is in development. Navigate here from the Calendar (arrow down) or from Roots (arrow right).
 
 ### Undo/Redo
 
@@ -127,8 +146,11 @@ npm test
 │   │   │   │   ├── TodoListPanel.tsx    # General objectives list
 │   │   │   │   └── __tests__/
 │   │   │   │       └── TodoListPanel.test.tsx
-│   │   │   └── tree/
-│   │   │       └── MainTree.tsx         # Middle screen: ReactFlow + background
+│   │   │   ├── tree/
+│   │   │   │   └── MainTree.tsx         # Middle screen: ReactFlow + background
+│   │   │   └── underground/
+│   │   │       ├── UndergroundView.tsx  # Bottom-right screen: nav + overlay
+│   │   │       └── UndergroundBackground.tsx  # Canvas: geological layers, diamonds, caves
 │   │   ├── nodes/
 │   │   │   └── RevisionNode.tsx         # Custom node: timer, label, controls
 │   │   └── ui/

@@ -56,8 +56,8 @@ export function RootsView() {
                 <RootsBackground />
             </div>
 
-            {/* Right Controls Container */}
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-6">
+            {/* Left Controls Container */}
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-6">
 
                 {/* Opacity Control */}
                 <div className="flex flex-col items-center gap-3 bg-gray-800/50 p-3 rounded-full backdrop-blur-sm border border-gray-700/50 group hover:bg-gray-800/80 transition-all">
@@ -100,6 +100,17 @@ export function RootsView() {
             >
                 <div className="w-6 h-6 border-2 border-amber-500/80 rounded-full border-b-0 border-r-0 rotate-45 mx-auto mb-1"></div>
                 <span className="text-xs">Back to Tree</span>
+            </div>
+
+            {/* Navigation Hint (Right to Underground) */}
+            <div
+                onClick={() => {
+                    scrollToArea('underground');
+                }}
+                className="absolute right-8 top-1/2 -translate-y-1/2 animate-bounce opacity-50 text-amber-500/60 z-20 cursor-pointer hover:opacity-100 transition-opacity flex items-center gap-3"
+            >
+                <span className="text-xs font-mono uppercase tracking-widest hidden md:block">Underground</span>
+                <div className="w-6 h-6 border-2 border-amber-500/60 rounded-full border-b-0 border-l-0 rotate-45"></div>
             </div>
 
             {/* Content: Windowed Statistics Panel */}
