@@ -1,9 +1,18 @@
-import { useMemo, useState, useEffect } from 'react';
-import { useTreeCanvas } from '../../../hooks/useTreeCanvas';
+import { useMemo } from 'react';
+import { BackgroundLayer } from './layers/BackgroundLayer';
+import { TreeLayer } from './layers/TreeLayer';
 
+/**
+ * BackgroundTree - Orchestrates the three-layer animated canvas stack.
+ *
+ * Layer 0 (z-0): BackgroundLayer - warm gradient that shifts with timer activity
+ * Layer 1 (z-1): TreeLayer - animated fractal tree with sway, glow, activation wave
+ * Layer 2 (z-2): OverlayLayer - floating particles (light motes + falling leaves)
+ *
+ * Each layer uses useAnimationLoop for independent RAF rendering with
+ * IntersectionObserver-based visibility optimization.
+ */
 export function BackgroundTree() {
-    const [isVisible, setIsVisible] = useState(true);
-
     const options = useMemo(() => ({
         direction: 'up' as const,
         startPosition: 'bottom-center' as const,
@@ -18,32 +27,11 @@ export function BackgroundTree() {
             : { stroke: 'rgba(51, 65, 85, 0.4)', shadow: 'transparent', blur: 0, lineWidth: 40 } // Slate-700
     }), []);
 
-    const canvasRef = useTreeCanvas(options, isVisible);
-
-    // Optimisation: Pauser le rendu quand l'arbre n'est pas à l'écran
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsVisible(entry.isIntersecting);
-            },
-            { threshold: 0.1 } // Marge de 10%
-        );
-
-        if (canvasRef.current) {
-            observer.observe(canvasRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, [canvasRef]);
-
     return (
-        <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-                zIndex: 0,
-                filter: 'blur(0.5px)'
-            }}
-        />
+        <div className="absolute inset-0">
+            <BackgroundLayer />
+            <TreeLayer options={options} />
+            {/* OverlayLayer added in Task 2 */}
+        </div>
     );
 }
