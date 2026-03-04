@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { BackgroundLayer } from './layers/BackgroundLayer';
 import { TreeLayer } from './layers/TreeLayer';
+import { OverlayLayer } from './layers/OverlayLayer';
 
 /**
  * BackgroundTree - Orchestrates the three-layer animated canvas stack.
@@ -31,7 +32,7 @@ export function BackgroundTree() {
         <div className="absolute inset-0">
             <BackgroundLayer />
             <TreeLayer options={options} />
-            {/* OverlayLayer added in Task 2 */}
+            <OverlayLayer />
         </div>
     );
 }
