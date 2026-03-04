@@ -1,6 +1,6 @@
-
-import { useRef, useEffect } from 'react';
+import { useRef, useCallback } from 'react';
 import { useRevisionStore } from '../store/useRevisionStore';
+import { useAnimationLoop } from './useAnimationLoop';
 import type { RevisionNode } from '../types';
 
 interface TreeCanvasOptions {
@@ -16,57 +16,56 @@ interface TreeCanvasOptions {
 }
 
 export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = true) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { nodes, edges, activeNodeId, activeAncestorIds } = useRevisionStore();
+    // ---- Zustand-RAF boundary: read store via selectors, cache into refs ----
+    // React re-renders update the refs. The RAF draw callback reads refs only, never the store.
+    const nodes = useRevisionStore((s) => s.nodes);
+    const edges = useRevisionStore((s) => s.edges);
+    const activeNodeId = useRevisionStore((s) => s.activeNodeId);
+    const activeAncestorIds = useRevisionStore((s) => s.activeAncestorIds);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+    const nodesRef = useRef(nodes);
+    const edgesRef = useRef(edges);
+    const activeNodeIdRef = useRef(activeNodeId);
+    const activeAncestorIdsRef = useRef(activeAncestorIds);
+    const optionsRef = useRef(options);
+    const isVisibleRef = useRef(isVisible);
 
-        const resizeCanvas = () => {
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = window.innerWidth * dpr;
-            canvas.height = window.innerHeight * dpr;
+    // Sync refs on every render
+    nodesRef.current = nodes;
+    edgesRef.current = edges;
+    activeNodeIdRef.current = activeNodeId;
+    activeAncestorIdsRef.current = activeAncestorIds;
+    optionsRef.current = options;
+    isVisibleRef.current = isVisible;
 
-            const ctx = canvas.getContext('2d');
-            if (ctx) ctx.scale(dpr, dpr);
+    // ---- Draw callback: empty dependency array, reads from refs ----
+    // deltaMs and totalMs are received but not yet used for animation (Plan 02 will use them).
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const draw = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number, _deltaMs: number, _totalMs: number) => {
+        // Skip drawing if not visible
+        if (!isVisibleRef.current) return;
 
-            canvas.style.width = `${window.innerWidth}px`;
-            canvas.style.height = `${window.innerHeight}px`;
-        };
+        const currentNodes = nodesRef.current;
+        const currentEdges = edgesRef.current;
+        const currentActiveNodeId = activeNodeIdRef.current;
+        const currentActiveAncestorIds = activeAncestorIdsRef.current;
+        const opts = optionsRef.current;
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        // Clear the canvas
+        ctx.clearRect(0, 0, width, height);
 
-        return () => {
-            window.removeEventListener('resize', resizeCanvas);
-        };
-    }, []);
+        const islandX = width / 2;
+        const islandY = opts.startPosition === 'bottom-center' ? height : 0;
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas || !isVisible) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        // Identify roots (nodes with no incoming edges)
+        const targetIds = new Set(currentEdges.map(e => e.target));
+        const roots = currentNodes.filter(n => !targetIds.has(n.id));
 
-        // Clear and set transform for DPR
-        const dpr = window.devicePixelRatio || 1;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-
-        const islandX = window.innerWidth / 2;
-        const islandY = options.startPosition === 'bottom-center' ? window.innerHeight : 0;
-
-        // Identify Roots
-        const targetIds = new Set(edges.map(e => e.target));
-        const roots = nodes.filter(n => !targetIds.has(n.id));
-
-        // Build Optimised Children Map (O(n))
+        // Build optimised children map (O(n))
         const childrenMap = new Map<string, RevisionNode[]>();
-        // First pass: put all nodes in a map by ID for O(1) lookup
-        const nodeMap = new Map(nodes.map(n => [n.id, n]));
+        const nodeMap = new Map(currentNodes.map(n => [n.id, n]));
 
-        for (const edge of edges) {
+        for (const edge of currentEdges) {
             const node = nodeMap.get(edge.target);
             if (node) {
                 const children = childrenMap.get(edge.source) || [];
@@ -75,8 +74,8 @@ export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = t
             }
         }
 
-        const activeSet = new Set(activeAncestorIds);
-        if (activeNodeId) activeSet.add(activeNodeId);
+        const activeSet = new Set(currentActiveAncestorIds);
+        if (currentActiveNodeId) activeSet.add(currentActiveNodeId);
 
         const pseudoRandom = (seed: number) => {
             const x = Math.sin(seed) * 10000;
@@ -88,11 +87,11 @@ export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = t
             startY: number,
             angle: number,
             length: number,
-            width: number,
+            branchWidth: number,
             nodeId: string | 'VIRTUAL_ROOT',
             depth: number
         ) => {
-            const isActive = nodeId === 'VIRTUAL_ROOT' ? activeNodeId !== null : activeSet.has(nodeId);
+            const isActive = nodeId === 'VIRTUAL_ROOT' ? currentActiveNodeId !== null : activeSet.has(nodeId);
 
             const endX = startX + Math.cos(angle) * length;
             const endY = startY + Math.sin(angle) * length;
@@ -100,7 +99,7 @@ export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = t
             const midX = (startX + endX) / 2;
             const midY = (startY + endY) / 2;
 
-            const curveOffset = length * options.curveFactor * (depth % 2 === 0 ? 1 : -1);
+            const curveOffset = length * opts.curveFactor * (depth % 2 === 0 ? 1 : -1);
             const cp1X = midX + Math.cos(angle + Math.PI / 2) * curveOffset;
             const cp1Y = midY + Math.sin(angle + Math.PI / 2) * curveOffset;
 
@@ -108,9 +107,9 @@ export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = t
             ctx.moveTo(startX, startY);
             ctx.quadraticCurveTo(cp1X, cp1Y, endX, endY);
 
-            const style = options.getBranchStyle(isActive);
+            const style = opts.getBranchStyle(isActive);
             ctx.lineCap = 'round';
-            ctx.lineWidth = width;
+            ctx.lineWidth = branchWidth;
             ctx.strokeStyle = style.stroke;
             ctx.shadowColor = style.shadow;
             ctx.shadowBlur = style.blur;
@@ -128,7 +127,7 @@ export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = t
 
             if (children.length === 0) return;
 
-            const baseSpread = Math.PI / options.spreadFactor;
+            const baseSpread = Math.PI / opts.spreadFactor;
             const currentSpread = Math.min(baseSpread, children.length * 0.6);
 
             const startAngle = angle - currentSpread / 2;
@@ -146,27 +145,28 @@ export function useTreeCanvas(options: TreeCanvasOptions, isVisible: boolean = t
                     endX,
                     endY,
                     childAngle,
-                    length * options.lengthDecay,
-                    width * options.widthDecay,
+                    length * opts.lengthDecay,
+                    branchWidth * opts.widthDecay,
                     child.id,
                     depth + 1
                 );
             });
         };
 
-        const startAngle = options.direction === 'up' ? -Math.PI / 2 : Math.PI / 2;
+        const startAngle = opts.direction === 'up' ? -Math.PI / 2 : Math.PI / 2;
 
         drawBranch(
             islandX,
-            islandY + (options.direction === 'up' ? 40 : 0), // Small offset for up tree
+            islandY + (opts.direction === 'up' ? 40 : 0),
             startAngle,
-            canvas.height * options.initialLengthFactor,
-            options.initialWidth,
+            height * opts.initialLengthFactor,
+            opts.initialWidth,
             'VIRTUAL_ROOT',
             0
         );
+    }, []);
 
-    }, [nodes, edges, activeNodeId, activeAncestorIds, options, isVisible]);
+    const canvasRef = useAnimationLoop(draw);
 
     return canvasRef;
 }
