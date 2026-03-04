@@ -7,7 +7,7 @@ import { warmthToGradient } from '../../../../animation/interpolation';
 /**
  * BackgroundLayer - Static gradient canvas that shifts warmer when a timer is active.
  *
- * Draws a linear gradient: warm amber/gold at top -> twilight purple -> deep night blue.
+ * Draws a linear gradient: deep night blue at top -> twilight purple -> warm amber/gold at bottom.
  * Uses a spring animation to smoothly transition the warmth value when activeNodeId changes.
  * Only redraws when the warmth spring is animating (skips frames when settled).
  */
@@ -52,11 +52,11 @@ export const BackgroundLayer = memo(function BackgroundLayer() {
         hasDrawnOnceRef.current = true;
 
         // Draw the gradient
-        const topColor = warmthToGradient(warmth);
+        const bottomColor = warmthToGradient(warmth);
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, `rgb(${topColor.r}, ${topColor.g}, ${topColor.b})`);
-        gradient.addColorStop(0.4, 'rgb(80, 60, 100)');  // Twilight purple
-        gradient.addColorStop(1, 'rgb(15, 15, 45)');      // Deep night blue
+        gradient.addColorStop(0, 'rgb(15, 15, 45)');      // Deep night blue (top)
+        gradient.addColorStop(0.6, 'rgb(80, 60, 100)');   // Twilight purple
+        gradient.addColorStop(1, `rgb(${bottomColor.r}, ${bottomColor.g}, ${bottomColor.b})`);
 
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
