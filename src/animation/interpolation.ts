@@ -1,13 +1,41 @@
 import { interpolate } from 'popmotion';
 
+/** Minimum branch thickness in pixels (new branches are still visible). */
+export const MIN_THICKNESS = 2.5;
+
+/** Maximum branch thickness in pixels (10+ hours of study). */
+export const MAX_THICKNESS = 28;
+
 /**
- * Map total study time (seconds) to branch thickness multiplier.
- * Input range: [0, 300, 3600, 36000] (0s, 5min, 1hr, 10hr)
- * Output range: [1.0, 1.3, 2.0, 3.5]
+ * Map cumulative study time (seconds) to branch thickness in pixels.
+ * Uses piecewise linear interpolation with logarithmic-feel breakpoints:
+ *   0s -> 2.5px, 60s -> 4px, 300s -> 7px, 1800s -> 13px, 7200s -> 20px, 36000s -> 28px
+ * Clamps at boundaries: values below 0 return MIN_THICKNESS, above 36000 return MAX_THICKNESS.
  */
 export const timeToThickness = interpolate(
-    [0, 300, 3600, 36000],
-    [1.0, 1.3, 2.0, 3.5]
+    [0, 60, 300, 1800, 7200, 36000],
+    [MIN_THICKNESS, 4, 7, 13, 20, MAX_THICKNESS]
+);
+
+/**
+ * Map branch thickness (pixels) to active branch stroke color.
+ * Transitions from light gold (thin) to deep amber (thick).
+ * Input: [2.5, 7, 13, 20, 28] -> amber-200 through amber-700.
+ * Returns rgba() strings (popmotion interpolate color output format).
+ */
+export const thicknessToColor = interpolate(
+    [MIN_THICKNESS, 7, 13, 20, MAX_THICKNESS],
+    ['#FDE68A', '#FCD34D', '#F59E0B', '#D97706', '#B45309']
+);
+
+/**
+ * Map branch thickness (pixels) to inactive (desaturated) branch stroke color.
+ * Uses slate colors with low opacity for a muted, dormant appearance.
+ * Input: [2.5, 7, 13, 20, 28] -> faint-to-medium slate with 0.3-0.5 opacity.
+ */
+export const thicknessToInactiveColor = interpolate(
+    [MIN_THICKNESS, 7, 13, 20, MAX_THICKNESS],
+    ['rgba(148,163,184,0.3)', 'rgba(100,116,139,0.35)', 'rgba(71,85,105,0.4)', 'rgba(51,65,85,0.45)', 'rgba(30,41,59,0.5)']
 );
 
 /**
