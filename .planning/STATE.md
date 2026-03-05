@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** The interactive visual tree that maps a student's revision structure and reacts to their active study
-**Current focus:** Phase 1 - Animation Foundation
+**Current focus:** Phase 2 - Branch Thickness System
 
 ## Current Position
 
-Phase: 1 of 6 (Animation Foundation)
-Plan: 2 of 2 (next: 01-02-PLAN.md)
-Status: Executing
-Last activity: 2026-03-04 — Completed 01-01-PLAN.md (animation utilities + RAF loop + useTreeCanvas refactor)
+Phase: 2 of 6 (Branch Thickness System)
+Plan: 1 of 2 (COMPLETED)
+Status: Executing Phase 2
+Last activity: 2026-03-05 — Completed 02-01-PLAN.md (data pipeline: cumulative time to thickness/color)
 
-Progress: [█░░░░░░░░░] 8%
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 4min
-- Total execution time: 0.07 hours
+- Total plans completed: 3
+- Average duration: 9min
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Animation Foundation | 1/2 | 4min | 4min |
+| 1. Animation Foundation | 2/2 | 22min | 11min |
+| 2. Branch Thickness System | 1/2 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min)
-- Trend: N/A (only 1 plan completed)
+- Last 5 plans: 01-01 (4min), 01-02 (18min), 02-01 (3min)
+- Trend: TDD pure-utility plans execute fast; canvas integration plans take longer
 
 *Updated after each plan completion*
 
@@ -46,6 +47,12 @@ Recent decisions affecting current work:
 - Zustand-RAF boundary pattern established: store values cached in refs, RAF draw callback reads refs only with empty useCallback dependency array
 - popmotion spring API verified: next(elapsedMs) takes elapsed time from animation start, not absolute timestamp
 - warmthToGradient uses pure function instead of popmotion interpolate (interpolate cannot return objects)
+- Three-layer canvas composition pattern: BackgroundLayer (z-0), TreeLayer (z-1), OverlayLayer (z-2)
+- Particles as always-ambient (light motes + falling leaves visible with or without active timer)
+- Deterministic particle initialization via pseudoRandom with index-based seeds (no Math.random)
+- buildCumulativeTimeMap uses closure-based memoization for O(n) subtree aggregation
+- timeToThickness outputs direct pixel widths (2.5-28px) instead of multipliers for simpler rendering pipeline
+- Color interpolation uses popmotion interpolate with hex/rgba for direct canvas strokeStyle consumption
 
 ### Pending Todos
 
@@ -63,6 +70,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-04 (plan execution)
-Stopped at: Completed 01-01-PLAN.md, ready for 01-02-PLAN.md
-Resume file: .planning/phases/01-animation-foundation/01-01-SUMMARY.md
+Last session: 2026-03-05 (plan execution)
+Stopped at: Completed 02-01-PLAN.md (data pipeline utilities)
+Resume file: .planning/phases/02-branch-thickness-system/02-01-SUMMARY.md
+Next: Execute 02-02-PLAN.md (TreeLayer integration with thickness/color)
