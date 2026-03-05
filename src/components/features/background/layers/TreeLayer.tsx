@@ -3,7 +3,7 @@ import { useRevisionStore } from '../../../../store/useRevisionStore';
 import { useAnimationLoop } from '../../../../hooks/useAnimationLoop';
 import { createSpringManager } from '../../../../animation/springManager';
 import { breathe } from '../../../../animation/easing';
-import { glowToOpacity, timeToThickness, thicknessToColor, thicknessToInactiveColor, MIN_THICKNESS, MAX_THICKNESS } from '../../../../animation/interpolation';
+import { glowToOpacity, timeToThickness, thicknessToColor, thicknessToInactiveColor, MIN_THICKNESS } from '../../../../animation/interpolation';
 import { buildCumulativeTimeMap } from '../../../../utils/graphHelpers';
 import type { RevisionNode } from '../../../../types';
 
@@ -298,7 +298,8 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             angle: number,
             length: number,
             nodeId: string | 'VIRTUAL_ROOT',
-            depth: number
+            depth: number,
+            parentTipWidth?: number
         ) => {
             const isActive = nodeId === 'VIRTUAL_ROOT'
                 ? currentActiveNodeId !== null
@@ -329,7 +330,15 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const endY = startY + Math.sin(swayedAngle) * effectiveLength;
 
             // --- Tapered branch rendering (filled polygon) ---
-            const startWidth = animatedThickness;
+            // Smooth junction: if parent passed its tip width, blend into it so the
+            // child's base width matches where the parent ended. This prevents abrupt
+            // width jumps at branch junctions. The base smoothly transitions from the
+            // parent's tip width to the child's own thickness over the first ~30% of
+            // the branch, then tapers normally to the tip.
+            const ownStartWidth = animatedThickness;
+            const startWidth = parentTipWidth !== undefined
+                ? Math.max(parentTipWidth, ownStartWidth * 0.6)
+                : ownStartWidth;
             const endWidth = animatedThickness * 0.55;
 
             const branchAngle = Math.atan2(endY - startY, endX - startX);
@@ -396,6 +405,17 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             ctx.fillStyle = color;
             ctx.fill();
 
+            // --- Junction knob: draw a filled circle at the base to smooth the
+            //     connection with the parent branch. The radius is the average of
+            //     the parent tip and the child base, creating a natural swelling. ---
+            if (parentTipWidth !== undefined && depth > 0) {
+                const junctionRadius = (startWidth * 0.5 + (parentTipWidth * 0.5)) / 2;
+                ctx.beginPath();
+                ctx.arc(startX, startY, junctionRadius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+
             ctx.shadowBlur = 0;
 
             // --- Cache branch rendering data for potential wither use ---
@@ -444,7 +464,8 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
                     childAngle,
                     effectiveLength * opts.lengthDecay,
                     child.id,
-                    depth + 1
+                    depth + 1,
+                    endWidth
                 );
             });
         };
