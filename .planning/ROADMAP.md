@@ -46,7 +46,7 @@ Plans:
   2. Branch thickness smoothly interpolates when study time increases (animated transition)
   3. The tree dynamically rebuilds when nodes are added or removed in ReactFlow
   4. Parent branches are thicker than child branches (ancestor accumulation is visible)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 02-01-PLAN.md — Data pipeline: buildCumulativeTimeMap utility + revised timeToThickness/thicknessToColor interpolations + TDD tests
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Animation Foundation | 2/2 | Complete | 2026-03-04 |
-| 2. Branch Thickness System | 2/2 | Complete | 2026-03-06 |
+| 2. Branch Thickness System | 2/2 | Complete    | 2026-03-06 |
 | 3. Tree Visual Rework | 0/TBD | Not started | - |
 | 4. Environment | 0/TBD | Not started | - |
 | 5. Roots Symmetry | 0/TBD | Not started | - |
