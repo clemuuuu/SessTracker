@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 
 ## Current Position
 
-Phase: 2 of 6 (Branch Thickness System)
-Plan: 1 of 2 (COMPLETED)
-Status: Executing Phase 2
-Last activity: 2026-03-05 — Completed 02-01-PLAN.md (data pipeline: cumulative time to thickness/color)
+Phase: 2 of 6 (Branch Thickness System) -- COMPLETE
+Plan: 2 of 2 (COMPLETED)
+Status: Phase 2 Complete -- ready for Phase 3
+Last activity: 2026-03-06 — Completed 02-02-PLAN.md (TreeLayer integration: tapered branches, sprout/wither)
 
-Progress: [███░░░░░░░] 25%
+Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 9min
-- Total execution time: 0.42 hours
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Animation Foundation | 2/2 | 22min | 11min |
-| 2. Branch Thickness System | 1/2 | 3min | 3min |
+| 2. Branch Thickness System | 2/2 | 11min | 5.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (18min), 02-01 (3min)
+- Last 5 plans: 01-01 (4min), 01-02 (18min), 02-01 (3min), 02-02 (8min)
 - Trend: TDD pure-utility plans execute fast; canvas integration plans take longer
 
 *Updated after each plan completion*
@@ -53,6 +53,10 @@ Recent decisions affecting current work:
 - buildCumulativeTimeMap uses closure-based memoization for O(n) subtree aggregation
 - timeToThickness outputs direct pixel widths (2.5-28px) instead of multipliers for simpler rendering pipeline
 - Color interpolation uses popmotion interpolate with hex/rgba for direct canvas strokeStyle consumption
+- Tapered branches drawn as filled polygons with quadraticCurveTo for organic shape
+- Parent tip width propagated to child base width for seamless branch junction transitions
+- Every-minute throttle on thickness spring retargeting to avoid constant spring resets
+- Extension springs (0->1 sprout, 1->0 wither) control branch lifecycle visibility
 
 ### Pending Todos
 
@@ -70,7 +74,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-05 (plan execution)
-Stopped at: Completed 02-01-PLAN.md (data pipeline utilities)
-Resume file: .planning/phases/02-branch-thickness-system/02-01-SUMMARY.md
-Next: Execute 02-02-PLAN.md (TreeLayer integration with thickness/color)
+Last session: 2026-03-06 (plan execution)
+Stopped at: Completed 02-02-PLAN.md (TreeLayer integration: tapered branches, sprout/wither)
+Resume file: .planning/phases/02-branch-thickness-system/02-02-SUMMARY.md
+Next: Phase 3 (Tree Visual Rework) — start with `/gsd:discuss-phase 3`

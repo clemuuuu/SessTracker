@@ -13,7 +13,7 @@ This milestone transforms the static fractal tree background into an interactive
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Animation Foundation** - Integrate popmotion/bezier-easing, RAF loop, layer separation
-- [ ] **Phase 2: Branch Thickness System** - Dynamic thickness based on cumulative time
+- [x] **Phase 2: Branch Thickness System** - Dynamic thickness based on cumulative time
 - [ ] **Phase 3: Tree Visual Rework** - Organic curves, polished style, lighting system
 - [ ] **Phase 4: Environment** - Ground, decorative elements, particles, ambiance
 - [ ] **Phase 5: Roots Symmetry** - Apply tree rework to roots background
@@ -49,8 +49,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Data pipeline: buildCumulativeTimeMap utility + revised timeToThickness/thicknessToColor interpolations + TDD tests
-- [ ] 02-02-PLAN.md — TreeLayer integration: data-driven thickness rendering, tapered branches, color gradient, sprout/wither animations + visual checkpoint
+- [x] 02-01-PLAN.md — Data pipeline: buildCumulativeTimeMap utility + revised timeToThickness/thicknessToColor interpolations + TDD tests
+- [x] 02-02-PLAN.md — TreeLayer integration: data-driven thickness rendering, tapered branches, color gradient, sprout/wither animations + visual checkpoint
 
 ### Phase 3: Tree Visual Rework
 **Goal**: The tree has a polished organic appearance with rich lighting
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Animation Foundation | 2/2 | Complete | 2026-03-04 |
-| 2. Branch Thickness System | 0/2 | Not started | - |
+| 2. Branch Thickness System | 2/2 | Complete | 2026-03-06 |
 | 3. Tree Visual Rework | 0/TBD | Not started | - |
 | 4. Environment | 0/TBD | Not started | - |
 | 5. Roots Symmetry | 0/TBD | Not started | - |
