@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Animation Foundation | 2/2 | Complete | 2026-03-04 |
 | 2. Branch Thickness System | 2/2 | Complete    | 2026-03-06 |
-| 3. Tree Visual Rework | 2/2 | Complete   | 2026-03-25 |
+| 3. Tree Visual Rework | 2/2 | Complete    | 2026-03-25 |
 | 4. Environment | 0/TBD | Not started | - |
 | 5. Roots Symmetry | 0/TBD | Not started | - |
 | 6. Stats Rework | 0/TBD | Not started | - |
