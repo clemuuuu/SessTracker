@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Animation Foundation** - Integrate popmotion/bezier-easing, RAF loop, layer separation
 - [x] **Phase 2: Branch Thickness System** - Dynamic thickness based on cumulative time
-- [ ] **Phase 3: Tree Visual Rework** - Organic curves, polished style, lighting system
+- [x] **Phase 3: Tree Visual Rework** - Organic curves, polished style, lighting system (completed 2026-03-25)
 - [ ] **Phase 4: Environment** - Ground, decorative elements, particles, ambiance
 - [ ] **Phase 5: Roots Symmetry** - Apply tree rework to roots background
 - [ ] **Phase 6: Stats Rework** - Remove todo list, active revision stats, sub-graphs
@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Animation Foundation | 2/2 | Complete | 2026-03-04 |
 | 2. Branch Thickness System | 2/2 | Complete    | 2026-03-06 |
-| 3. Tree Visual Rework | 0/TBD | Not started | - |
+| 3. Tree Visual Rework | 2/2 | Complete   | 2026-03-25 |
 | 4. Environment | 0/TBD | Not started | - |
 | 5. Roots Symmetry | 0/TBD | Not started | - |
 | 6. Stats Rework | 0/TBD | Not started | - |

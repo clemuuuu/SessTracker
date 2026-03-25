@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 3 of 6 (Tree Visual Rework)
-Plan: 1 of 2 (COMPLETED)
-Status: Phase 3 in progress — 03-01 complete, 03-02 pending
-Last activity: 2026-03-25 — Completed 03-01-PLAN.md (organic Bezier branches, control-point sway, inactive gradient, leaf buds)
+Plan: 2 of 2 (COMPLETED)
+Status: Phase 3 COMPLETE — 03-01 and 03-02 both complete
+Last activity: 2026-03-25 — Completed 03-02-PLAN.md (radial gradient glow system, batched lighter compositing, progressive ancestor falloff)
 
 Progress: [█████░░░░░] 42%
 
@@ -36,6 +36,7 @@ Progress: [█████░░░░░] 42%
 - Trend: Canvas rendering plans execute fast when well-specified; single-file targeted changes are fastest
 
 *Updated after each plan completion*
+| Phase 03-tree-visual-rework P02 | 4 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - Parent tip width propagated to child base width for seamless branch junction transitions
 - Every-minute throttle on thickness spring retargeting to avoid constant spring resets
 - Extension springs (0->1 sprout, 1->0 wither) control branch lifecycle visibility
+- [Phase 03-tree-visual-rework]: Batched glow pass deferred after all branch shapes using globalCompositeOperation=lighter prevents compositor contamination of inactive branches
+- [Phase 03-tree-visual-rework]: GlowEntry queue pattern: collect render data during traversal, execute compositor-sensitive draw in a deferred pass; ctx.save()/restore() auto-restores globalCompositeOperation
+- [Phase 03-tree-visual-rework]: Progressive ancestor falloff: Math.pow(0.65, depthDelta) where depthDelta = activeNodeDepth - branchDepth; requires pre-traversal findDepth pass
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-25 (plan execution)
-Stopped at: Completed 03-01-PLAN.md (organic Bezier branches, control-point sway, inactive gradient, leaf buds)
-Resume file: .planning/phases/03-tree-visual-rework/03-01-SUMMARY.md
-Next: 03-02-PLAN.md (glow/shadow rework)
+Stopped at: Completed 03-02-PLAN.md (radial gradient glow system, batched lighter compositing, progressive ancestor falloff)
+Resume file: .planning/phases/03-tree-visual-rework/03-02-SUMMARY.md
+Next: Phase 4 (next phase after Tree Visual Rework)

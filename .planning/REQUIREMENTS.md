@@ -10,7 +10,7 @@
 - [x] **TREE-01**: The 2D tree is redrawn with organic curves and a polished visual style
 - [x] **TREE-02**: Branches grow thicker proportionally to cumulative study time on each node
 - [x] **TREE-03**: Branch size/color transitions are smoothly animated (requestAnimationFrame + interpolation)
-- [ ] **TREE-04**: Active branch and ancestors have a rich lighting system (pulsing glow, radial gradients, not just shadowBlur)
+- [x] **TREE-04**: Active branch and ancestors have a rich lighting system (pulsing glow, radial gradients, not just shadowBlur)
 - [x] **TREE-05**: The tree dynamically builds according to nodes added in ReactFlow
 
 ### Environment
@@ -62,7 +62,7 @@
 | TREE-01 | Phase 3 | Complete |
 | TREE-02 | Phase 2 | Complete |
 | TREE-03 | Phase 1 | Complete |
-| TREE-04 | Phase 3 | Pending |
+| TREE-04 | Phase 3 | Complete |
 | TREE-05 | Phase 2 | Complete |
 | ENV-01 | Phase 4 | Pending |
 | ENV-02 | Phase 4 | Pending |
