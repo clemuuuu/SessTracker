@@ -316,15 +316,19 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const color = isActive
                 ? thicknessToColor(animatedThickness)
                 : thicknessToInactiveColor(animatedThickness);
+            // For inactive branches: create a subtle linear gradient from base (slightly lighter) to tip
+            let fillStyle: string | CanvasGradient = color;
 
             // --- Ambient sway (scaled inversely with thickness) ---
             const branchSeed = nodeId === 'VIRTUAL_ROOT'
                 ? 42
                 : nodeId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const swayAmplitude = 0.02 * (1 + depth * 0.1) * (MIN_THICKNESS / Math.max(animatedThickness, MIN_THICKNESS));
+            const swayAmplitude = 0.018 * (1 + depth * 0.1) * (MIN_THICKNESS / Math.max(animatedThickness, MIN_THICKNESS));
             const swayPeriod = 2000 + pseudoRandom(branchSeed + 7) * 2000; // 2000-4000ms
-            const swayOffset = swayAmplitude * Math.sin(totalMs / swayPeriod + branchSeed);
-            const swayedAngle = angle + swayOffset;
+            // swayPerp: lateral displacement at mid-branch (used for control point bending)
+            // effectiveLength * amplitude factor produces pixel-space perpendicular offset
+            const swayPerp = effectiveLength * swayAmplitude * Math.sin(totalMs / swayPeriod + branchSeed);
+            const swayedAngle = angle; // endpoints stay fixed; sway is in control points only
 
             const endX = startX + Math.cos(swayedAngle) * effectiveLength;
             const endY = startY + Math.sin(swayedAngle) * effectiveLength;
@@ -357,9 +361,6 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const x4 = endX + Math.cos(perpAngle) * halfEndW;
             const y4 = endY + Math.sin(perpAngle) * halfEndW;
 
-            // Slight curve bulge for organic feel
-            const bulgeFactor = startWidth * 0.05;
-
             const style = opts.getBranchStyle(isActive);
 
             // --- Breathing glow (active branches only) ---
@@ -387,22 +388,47 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
                 }
             }
 
-            // Draw tapered branch as filled polygon with smooth edges
+            // Inactive gradient: subtle lighter-at-base linear gradient
+            if (!isActive) {
+                const inactiveGrad = ctx.createLinearGradient(startX, startY, endX, endY);
+                const lighterBase = color.replace(/,([\d.]+)\)$/, (_, a) =>
+                    `,${Math.min(1, parseFloat(a) + 0.1)})`
+                );
+                inactiveGrad.addColorStop(0, lighterBase); // slightly lighter at base (root end)
+                inactiveGrad.addColorStop(1, color);       // normal at tip
+                fillStyle = inactiveGrad;
+            }
+
+            // Cubic Bezier polygon with convex outward edges (subtle organic arc)
+            // Control points at 1/3 and 2/3 of branch length, pushed outward perpendicularly
+            const curvePush = effectiveLength * 0.06; // 6% of length — subtle per user decision
+
+            // Axis points at t=1/3 and t=2/3
+            const ax1 = startX + (endX - startX) / 3;
+            const ay1 = startY + (endY - startY) / 3;
+            const ax2 = startX + (endX - startX) * 2 / 3;
+            const ay2 = startY + (endY - startY) * 2 / 3;
+
+            // Right edge control points (push outward perpendicular)
+            // cp1 carries 30% of sway (keeps base tangent smooth), cp2 carries full sway
+            const rcp1x = ax1 + Math.cos(perpAngle) * (curvePush + swayPerp * 0.3);
+            const rcp1y = ay1 + Math.sin(perpAngle) * (curvePush + swayPerp * 0.3);
+            const rcp2x = ax2 + Math.cos(perpAngle) * (curvePush + swayPerp);
+            const rcp2y = ay2 + Math.sin(perpAngle) * (curvePush + swayPerp);
+
+            // Left edge control points (push outward on opposite side)
+            const lcp1x = ax1 - Math.cos(perpAngle) * (curvePush - swayPerp * 0.3);
+            const lcp1y = ay1 - Math.sin(perpAngle) * (curvePush - swayPerp * 0.3);
+            const lcp2x = ax2 - Math.cos(perpAngle) * (curvePush - swayPerp);
+            const lcp2y = ay2 - Math.sin(perpAngle) * (curvePush - swayPerp);
+
             ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.quadraticCurveTo(
-                (x1 + x4) / 2 + Math.cos(perpAngle) * bulgeFactor,
-                (y1 + y4) / 2 + Math.sin(perpAngle) * bulgeFactor,
-                x4, y4
-            );
-            ctx.lineTo(x3, y3);
-            ctx.quadraticCurveTo(
-                (x2 + x3) / 2 - Math.cos(perpAngle) * bulgeFactor,
-                (y2 + y3) / 2 - Math.sin(perpAngle) * bulgeFactor,
-                x2, y2
-            );
+            ctx.moveTo(x1, y1);                                          // right base corner
+            ctx.bezierCurveTo(rcp1x, rcp1y, rcp2x, rcp2y, x4, y4);    // right edge (convex)
+            ctx.lineTo(x3, y3);                                          // tip: right to left
+            ctx.bezierCurveTo(lcp2x, lcp2y, lcp1x, lcp1y, x2, y2);    // left edge (reversed, convex)
             ctx.closePath();
-            ctx.fillStyle = color;
+            ctx.fillStyle = fillStyle;
             ctx.fill();
 
             // --- Junction knob: draw a filled circle at the base to smooth the
@@ -440,6 +466,19 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             } else {
                 children = (childrenMap.get(nodeId) || [])
                     .sort((a, b) => a.position.x - b.position.x);
+            }
+
+            // Bud at leaf tips: small ellipse at the branch endpoint for nodes with no children
+            const nodeChildren = nodeId === 'VIRTUAL_ROOT'
+                ? [...roots]
+                : (childrenMap.get(nodeId) || []);
+            if (nodeChildren.length === 0) {
+                const budRadiusX = Math.max(1.5, endWidth * 0.7);
+                const budRadiusY = budRadiusX * 0.85;
+                ctx.beginPath();
+                ctx.ellipse(endX, endY, budRadiusX, budRadiusY, branchAngle, 0, Math.PI * 2);
+                ctx.fillStyle = color; // same base color as branch
+                ctx.fill();
             }
 
             if (children.length === 0) return;
@@ -516,24 +555,30 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const wx4 = witherEndX + Math.cos(witherPerp) * halfWE;
             const wy4 = witherEndY + Math.sin(witherPerp) * halfWE;
 
-            const wBulge = witherStartWidth * 0.05;
+            // Cubic Bezier polygon for withering branches (no sway — static cached shape)
+            const witherLen = Math.hypot(witherEndX - data.startX, witherEndY - data.startY);
+            const wCurvePush = witherLen * 0.06;
+            const wax1 = data.startX + (witherEndX - data.startX) / 3;
+            const way1 = data.startY + (witherEndY - data.startY) / 3;
+            const wax2 = data.startX + (witherEndX - data.startX) * 2 / 3;
+            const way2 = data.startY + (witherEndY - data.startY) * 2 / 3;
+
+            const wrcp1x = wax1 + Math.cos(witherPerp) * wCurvePush;
+            const wrcp1y = way1 + Math.sin(witherPerp) * wCurvePush;
+            const wrcp2x = wax2 + Math.cos(witherPerp) * wCurvePush;
+            const wrcp2y = way2 + Math.sin(witherPerp) * wCurvePush;
+            const wlcp1x = wax1 - Math.cos(witherPerp) * wCurvePush;
+            const wlcp1y = way1 - Math.sin(witherPerp) * wCurvePush;
+            const wlcp2x = wax2 - Math.cos(witherPerp) * wCurvePush;
+            const wlcp2y = way2 - Math.sin(witherPerp) * wCurvePush;
 
             ctx.beginPath();
             ctx.moveTo(wx1, wy1);
-            ctx.quadraticCurveTo(
-                (wx1 + wx4) / 2 + Math.cos(witherPerp) * wBulge,
-                (wy1 + wy4) / 2 + Math.sin(witherPerp) * wBulge,
-                wx4, wy4
-            );
+            ctx.bezierCurveTo(wrcp1x, wrcp1y, wrcp2x, wrcp2y, wx4, wy4);
             ctx.lineTo(wx3, wy3);
-            ctx.quadraticCurveTo(
-                (wx2 + wx3) / 2 - Math.cos(witherPerp) * wBulge,
-                (wy2 + wy3) / 2 - Math.sin(witherPerp) * wBulge,
-                wx2, wy2
-            );
+            ctx.bezierCurveTo(wlcp2x, wlcp2y, wlcp1x, wlcp1y, wx2, wy2);
             ctx.closePath();
             ctx.fillStyle = data.color;
-            // Fade out as it withers
             ctx.globalAlpha = extProgress;
             ctx.fill();
             ctx.globalAlpha = 1;
