@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** The interactive visual tree that maps a student's revision structure and reacts to their active study
-**Current focus:** Phase 2 - Branch Thickness System
+**Current focus:** Phase 3 - Tree Visual Rework
 
 ## Current Position
 
-Phase: 2 of 6 (Branch Thickness System) -- COMPLETE
-Plan: 2 of 2 (COMPLETED)
-Status: Phase 2 Complete -- ready for Phase 3
-Last activity: 2026-03-06 — Completed 02-02-PLAN.md (TreeLayer integration: tapered branches, sprout/wither)
+Phase: 3 of 6 (Tree Visual Rework)
+Plan: 1 of 2 (COMPLETED)
+Status: Phase 3 in progress — 03-01 complete, 03-02 pending
+Last activity: 2026-03-25 — Completed 03-01-PLAN.md (organic Bezier branches, control-point sway, inactive gradient, leaf buds)
 
-Progress: [████░░░░░░] 33%
+Progress: [█████░░░░░] 42%
 
 ## Performance Metrics
 
@@ -29,10 +29,11 @@ Progress: [████░░░░░░] 33%
 |-------|-------|-------|----------|
 | 1. Animation Foundation | 2/2 | 22min | 11min |
 | 2. Branch Thickness System | 2/2 | 11min | 5.5min |
+| 3. Tree Visual Rework | 1/2 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (18min), 02-01 (3min), 02-02 (8min)
-- Trend: TDD pure-utility plans execute fast; canvas integration plans take longer
+- Last 5 plans: 01-02 (18min), 02-01 (3min), 02-02 (8min), 03-01 (3min)
+- Trend: Canvas rendering plans execute fast when well-specified; single-file targeted changes are fastest
 
 *Updated after each plan completion*
 
@@ -53,7 +54,10 @@ Recent decisions affecting current work:
 - buildCumulativeTimeMap uses closure-based memoization for O(n) subtree aggregation
 - timeToThickness outputs direct pixel widths (2.5-28px) instead of multipliers for simpler rendering pipeline
 - Color interpolation uses popmotion interpolate with hex/rgba for direct canvas strokeStyle consumption
-- Tapered branches drawn as filled polygons with quadraticCurveTo for organic shape
+- Tapered branches now drawn with cubic bezierCurveTo polygon edges (convex outward arc, 6% of branch length)
+- Control-point sway: swayPerp perpendicular displacement in Bezier CPs keeps endpoints fixed (no junction drift)
+- Inactive branches use subtle linear gradient fill (lighter at base, normal at tip)
+- Leaf-node branches have small bud ellipse at tip (proportional to endWidth)
 - Parent tip width propagated to child base width for seamless branch junction transitions
 - Every-minute throttle on thickness spring retargeting to avoid constant spring resets
 - Extension springs (0->1 sprout, 1->0 wither) control branch lifecycle visibility
@@ -74,7 +78,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06 (plan execution)
-Stopped at: Completed 02-02-PLAN.md (TreeLayer integration: tapered branches, sprout/wither)
-Resume file: .planning/phases/02-branch-thickness-system/02-02-SUMMARY.md
-Next: Phase 3 (Tree Visual Rework) — start with `/gsd:discuss-phase 3`
+Last session: 2026-03-25 (plan execution)
+Stopped at: Completed 03-01-PLAN.md (organic Bezier branches, control-point sway, inactive gradient, leaf buds)
+Resume file: .planning/phases/03-tree-visual-rework/03-01-SUMMARY.md
+Next: 03-02-PLAN.md (glow/shadow rework)

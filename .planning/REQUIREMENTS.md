@@ -7,7 +7,7 @@
 
 ### Tree Rendering
 
-- [ ] **TREE-01**: The 2D tree is redrawn with organic curves and a polished visual style
+- [x] **TREE-01**: The 2D tree is redrawn with organic curves and a polished visual style
 - [x] **TREE-02**: Branches grow thicker proportionally to cumulative study time on each node
 - [x] **TREE-03**: Branch size/color transitions are smoothly animated (requestAnimationFrame + interpolation)
 - [ ] **TREE-04**: Active branch and ancestors have a rich lighting system (pulsing glow, radial gradients, not just shadowBlur)
@@ -59,7 +59,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TREE-01 | Phase 3 | Pending |
+| TREE-01 | Phase 3 | Complete |
 | TREE-02 | Phase 2 | Complete |
 | TREE-03 | Phase 1 | Complete |
 | TREE-04 | Phase 3 | Pending |
