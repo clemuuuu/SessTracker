@@ -385,8 +385,6 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const y1 = startY + Math.sin(perpAngle) * halfStartW;
             const x2 = startX - Math.cos(perpAngle) * halfStartW;
             const y2 = startY - Math.sin(perpAngle) * halfStartW;
-            const x3 = endX - Math.cos(perpAngle) * halfEndW;
-            const y3 = endY - Math.sin(perpAngle) * halfEndW;
             const x4 = endX + Math.cos(perpAngle) * halfEndW;
             const y4 = endY + Math.sin(perpAngle) * halfEndW;
 
@@ -436,10 +434,10 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const lcp2y = ay2 - Math.sin(perpAngle) * (curvePush - swayPerp);
 
             ctx.beginPath();
-            ctx.moveTo(x1, y1);                                          // right base corner
-            ctx.bezierCurveTo(rcp1x, rcp1y, rcp2x, rcp2y, x4, y4);    // right edge (convex)
-            ctx.lineTo(x3, y3);                                          // tip: right to left
-            ctx.bezierCurveTo(lcp2x, lcp2y, lcp1x, lcp1y, x2, y2);    // left edge (reversed, convex)
+            ctx.moveTo(x1, y1);                                                            // right base corner
+            ctx.bezierCurveTo(rcp1x, rcp1y, rcp2x, rcp2y, x4, y4);                      // right edge (convex)
+            ctx.arc(endX, endY, halfEndW, perpAngle, perpAngle + Math.PI, true);         // rounded tip cap
+            ctx.bezierCurveTo(lcp2x, lcp2y, lcp1x, lcp1y, x2, y2);                      // left edge (reversed, convex)
             ctx.closePath();
             ctx.fillStyle = fillStyle;
             ctx.fill();
@@ -491,18 +489,6 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
                     .sort((a, b) => a.position.x - b.position.x);
             }
 
-            // Bud at leaf tips: small ellipse at the branch endpoint for nodes with no children
-            const nodeChildren = nodeId === 'VIRTUAL_ROOT'
-                ? [...roots]
-                : (childrenMap.get(nodeId) || []);
-            if (nodeChildren.length === 0) {
-                const budRadiusX = Math.max(1.5, endWidth * 0.7);
-                const budRadiusY = budRadiusX * 0.85;
-                ctx.beginPath();
-                ctx.ellipse(endX, endY, budRadiusX, budRadiusY, branchAngle, 0, Math.PI * 2);
-                ctx.fillStyle = color; // same base color as branch
-                ctx.fill();
-            }
 
             if (children.length === 0) return;
 
@@ -573,8 +559,6 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const wy1 = data.startY + Math.sin(witherPerp) * halfWS;
             const wx2 = data.startX - Math.cos(witherPerp) * halfWS;
             const wy2 = data.startY - Math.sin(witherPerp) * halfWS;
-            const wx3 = witherEndX - Math.cos(witherPerp) * halfWE;
-            const wy3 = witherEndY - Math.sin(witherPerp) * halfWE;
             const wx4 = witherEndX + Math.cos(witherPerp) * halfWE;
             const wy4 = witherEndY + Math.sin(witherPerp) * halfWE;
 
@@ -598,7 +582,7 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             ctx.beginPath();
             ctx.moveTo(wx1, wy1);
             ctx.bezierCurveTo(wrcp1x, wrcp1y, wrcp2x, wrcp2y, wx4, wy4);
-            ctx.lineTo(wx3, wy3);
+            ctx.arc(witherEndX, witherEndY, halfWE, witherPerp, witherPerp + Math.PI, true);
             ctx.bezierCurveTo(wlcp2x, wlcp2y, wlcp1x, wlcp1y, wx2, wy2);
             ctx.closePath();
             ctx.fillStyle = data.color;
