@@ -3,7 +3,7 @@ import { useRevisionStore } from '../../../../store/useRevisionStore';
 import { useAnimationLoop } from '../../../../hooks/useAnimationLoop';
 import { createSpringManager } from '../../../../animation/springManager';
 import { breathe } from '../../../../animation/easing';
-import { glowToOpacity, timeToThickness, thicknessToColor, thicknessToInactiveColor, MIN_THICKNESS } from '../../../../animation/interpolation';
+import { timeToThickness, thicknessToColor, thicknessToInactiveColor, MIN_THICKNESS } from '../../../../animation/interpolation';
 import { buildCumulativeTimeMap } from '../../../../utils/graphHelpers';
 import type { RevisionNode } from '../../../../types';
 
@@ -23,6 +23,14 @@ interface TreeCanvasOptions {
 
 interface TreeLayerProps {
     options: TreeCanvasOptions;
+}
+
+/** Entry in the glow queue for the batched radial gradient pass */
+interface GlowEntry {
+    midX: number;
+    midY: number;
+    glowRadius: number;
+    centerAlpha: number;
 }
 
 /** Data cached per branch for wither animations after node deletion */
@@ -107,6 +115,9 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
 
         // Clear the canvas
         ctx.clearRect(0, 0, width, height);
+
+        // Glow queue: collect entries during drawBranch traversal, render in a single batched pass
+        const glowQueue: GlowEntry[] = [];
 
         // --- Activation wave detection ---
         if (currentActiveNodeId !== prevActiveNodeIdRef.current) {
@@ -279,9 +290,27 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
         const glowCycleMs = 2500;
         const glowProgress = (totalMs % glowCycleMs) / glowCycleMs;
         const easedGlowProgress = breathe(glowProgress);
-        const glowIntensity = glowToOpacity(easedGlowProgress);
 
         const totalAncestorDepth = waveAncestorDepthRef.current;
+
+        // Pre-traversal: find depth of active node for progressive ancestor falloff
+        let activeNodeDepth = 0;
+        if (currentActiveNodeId !== null) {
+            const findDepth = (nodeId: string | 'VIRTUAL_ROOT', depth: number): boolean => {
+                if (nodeId === currentActiveNodeId) {
+                    activeNodeDepth = depth;
+                    return true;
+                }
+                const children = nodeId === 'VIRTUAL_ROOT'
+                    ? [...roots].sort((a, b) => a.position.x - b.position.x)
+                    : (childrenMap.get(nodeId) || []).sort((a, b) => a.position.x - b.position.x);
+                for (const child of children) {
+                    if (findDepth(child.id, depth + 1)) return true;
+                }
+                return false;
+            };
+            findDepth('VIRTUAL_ROOT', 0);
+        }
 
         // Build parent map for caching branch parentId
         const parentMap = new Map<string, string>();
@@ -361,30 +390,14 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             const x4 = endX + Math.cos(perpAngle) * halfEndW;
             const y4 = endY + Math.sin(perpAngle) * halfEndW;
 
-            const style = opts.getBranchStyle(isActive);
-
-            // --- Breathing glow (active branches only) ---
-            if (isActive && currentActiveNodeId !== null) {
-                const glowAlpha = glowIntensity;
-                ctx.shadowColor = style.shadow.replace(')', `, ${glowAlpha})`).replace('rgb(', 'rgba(');
-                if (!style.shadow.includes('rgb')) {
-                    ctx.shadowColor = style.shadow;
-                }
-                // Scale glow blur with thickness
-                ctx.shadowBlur = style.blur * glowAlpha * (animatedThickness / MIN_THICKNESS) * 0.5;
-            } else {
-                ctx.shadowColor = style.shadow;
-                ctx.shadowBlur = style.blur;
-            }
-
-            // --- Activation wave flash ---
+            // --- Activation wave boost (collected for glow queue, no shadowBlur) ---
+            let waveBoost = 0;
             if (isActive && waveProgress !== undefined && !waveDone && totalAncestorDepth > 0) {
                 const normalizedDepth = depth / totalAncestorDepth;
                 const waveReaches = waveProgress > normalizedDepth;
                 if (waveReaches) {
                     const distancePastNode = waveProgress - normalizedDepth;
-                    const flashIntensity = Math.max(0, 1 - distancePastNode * 3);
-                    ctx.shadowBlur = Math.max(ctx.shadowBlur, 30 * flashIntensity);
+                    waveBoost = Math.max(0, 1 - distancePastNode * 3);
                 }
             }
 
@@ -442,7 +455,17 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
                 ctx.fill();
             }
 
-            ctx.shadowBlur = 0;
+            // --- Collect glow data for active branches (drawn in separate pass after all branches) ---
+            if (isActive && currentActiveNodeId !== null && !witheringNodesRef.current.has(nodeId === 'VIRTUAL_ROOT' ? '' : nodeId)) {
+                const midX = (startX + endX) / 2;
+                const midY = (startY + endY) / 2;
+                const depthDelta = Math.max(0, activeNodeDepth - depth);
+                const ancestorFalloff = Math.pow(0.65, depthDelta);
+                const baseRadius = animatedThickness * 2.5;
+                const glowRadius = baseRadius * (0.7 + 0.3 * easedGlowProgress) * (0.6 + 0.4 * ancestorFalloff) + waveBoost * 20;
+                const centerAlpha = (0.15 + 0.25 * easedGlowProgress) * ancestorFalloff + waveBoost * 0.3;
+                glowQueue.push({ midX, midY, glowRadius, centerAlpha: Math.min(0.9, centerAlpha) });
+            }
 
             // --- Cache branch rendering data for potential wither use ---
             if (nodeId !== 'VIRTUAL_ROOT') {
@@ -591,6 +614,27 @@ export const TreeLayer = memo(function TreeLayer({ options }: TreeLayerProps) {
             mgr.remove('thick-' + id);
             targetThicknessMapRef.current.delete(id);
             lastBranchDataRef.current.delete(id);
+        }
+
+        // --- Glow pass: draw all active branch radial gradients with 'lighter' compositing ---
+        // Batched AFTER all branch shapes to prevent compositor contamination of inactive branches
+        if (glowQueue.length > 0) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+
+            for (const g of glowQueue) {
+                if (g.glowRadius <= 0 || g.centerAlpha <= 0) continue;
+                const grad = ctx.createRadialGradient(g.midX, g.midY, 0, g.midX, g.midY, g.glowRadius);
+                grad.addColorStop(0, `rgba(253, 211, 77, ${g.centerAlpha.toFixed(3)})`);        // amber-300
+                grad.addColorStop(0.35, `rgba(245, 158, 11, ${(g.centerAlpha * 0.5).toFixed(3)})`); // amber-500
+                grad.addColorStop(1, 'rgba(245, 158, 11, 0)');                                  // transparent edge
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(g.midX, g.midY, g.glowRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
         }
     }, []);
 
